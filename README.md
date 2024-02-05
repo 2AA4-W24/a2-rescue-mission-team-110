@@ -4,7 +4,7 @@
 - Authors:
   - [Calvin, Salsali](salsalic@mcmaster.ca) 
   - [Richard, Han](hanr23@mcmaster.ca)
-  - [Firstname_3, Lastname_3](macid@mcmaster.ca)
+  - [Raymond, Tao](taor10@mcmaster.ca)
 
 ## Product Description
 
