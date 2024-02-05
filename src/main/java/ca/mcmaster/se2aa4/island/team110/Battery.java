@@ -4,7 +4,7 @@ public class Battery{
   private int batteryLevel;
 
   public Battery (int batteryLevel){
-    this.batteryLevel = totalbatterylevel;
+    this.batteryLevel = batteryLevel;
   }
 
   public void batteryConsumption(){
