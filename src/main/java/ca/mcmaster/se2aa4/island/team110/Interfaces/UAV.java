@@ -6,10 +6,9 @@ public interface UAV{
 
     int getPosX();
 
-    int getPostY();
+    int getPosY();
 
     String getDirection();
-
 
 }
 
