@@ -9,6 +9,15 @@ public class Drone implements UAV{
     private int posY;
     private String direction;
 
+    public Drone(int battery, int posX, int posY, String direction) { 
+
+        this.battery = battery;
+        this.posX = posX;
+        this.posY = posY;
+        this.direction = direction;
+
+    }
+
     public int getBattery() {
         return this.battery;
     }
