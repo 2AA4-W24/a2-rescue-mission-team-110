@@ -1,6 +1,6 @@
 package ca.mcmaster.se2aa4.island.team110;
 
-import ca.mcmaster.se2aa4.island.team110.Interfaces.readJson;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Translator;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -12,11 +12,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class jsonHandler implements readJson{
-  private static final Logger logger = LogManager.getLogger(jsonHandler.class);
+public class jsonTranslator implements Translator{
+  private static final Logger logger = LogManager.getLogger(jsonTranslator.class);
 
   @Override
-  public JSONObject readJSon(String filename) {
+  public JSONObject translateJSon(String filename) {
     JSONObject result = null;
 
     try {
