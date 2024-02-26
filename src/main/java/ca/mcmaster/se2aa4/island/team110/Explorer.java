@@ -11,7 +11,6 @@ import org.json.JSONTokener;
 public class Explorer implements IExplorerRaid {
 
     private final Logger logger = LogManager.getLogger();
-    private int i = 0;
     jsonTranslator t = new jsonTranslator();
 
 
@@ -36,8 +35,8 @@ public class Explorer implements IExplorerRaid {
 
     @Override
     public void acknowledgeResults(String s) {
-        
         JSONObject response = new JSONObject(new JSONTokener(new StringReader(s)));
+        Information i = t.translateJSon(response);
         logger.info("** Response received:\n"+response.toString(2));
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
