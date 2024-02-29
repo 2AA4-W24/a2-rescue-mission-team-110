@@ -20,41 +20,55 @@ public class jsonTranslator implements Translator{
   private static final Logger logger = LogManager.getLogger(jsonTranslator.class);
 
   @Override
-  public Map<Integer, Map<String, Integer>> translateJSon(String filename) {
-    Map<Integer, Map<String, Integer>> map = new HashMap<>();
+  public Map<Integer, Map<String, Object>> translateJSon(String filename) {
+    Map<Integer, Map<String, Object>> map = new HashMap<>();
 
     try {
       File file = new File(filename);
       FileReader reader = new FileReader(file);
+
       JSONTokener tokener = new JSONTokener(reader);
-
       JSONObject jsonObject = new JSONObject(tokener);
+
+
       JSONArray edges = jsonObject.getJSONArray("edge_props");
+      addToMap(edges, map);
 
-      for (int i = 0; i< edges.length(); i++){
-        JSONObject edge = edges.getJSONObject(i);
-        int key = edge.getInt("key");
-        JSONArray vals = edge.getJSONArray("vals");
+      JSONArray vertices = jsonObject.getJSONArray("vertex_props");
+      addToMap(vertices, map);
 
-        Map<String,Integer> information = new HashMap<>();
-        for (int j=0; j<vals.length(); j++){
-          JSONObject val = vals.getJSONObject(j);
-          String info = val.getString("p");
-          int value = val.getInt("v");
-          information.put(info, value);
-        } 
-        
-        map.put(key, information);
+      
 
-
-      }
+    
 
       
     } catch (IOException e) {
       logger.info(filename + " not accepted.");
     }
 
+    
+
     return map;
+  }
+
+  private void addToMap(JSONArray array, Map<Integer, Map<String, Object>> map){
+    for (int i = 0; i< array.length(); i++){
+      JSONObject prop = array.getJSONObject(i);
+      int key = prop.getInt("key");
+      JSONArray vals = prop.getJSONArray("vals");
+
+      Map<String,Object> information = map.getOrDefault(key, new HashMap<>());
+      for (int j=0; j<vals.length(); j++){
+        JSONObject val = vals.getJSONObject(j);
+        String info = val.getString("p");
+        Object value = val.get("v");
+        information.put(info, value);
+      } 
+      
+      map.put(key, information);
+
+
+    }
   }
 
   
