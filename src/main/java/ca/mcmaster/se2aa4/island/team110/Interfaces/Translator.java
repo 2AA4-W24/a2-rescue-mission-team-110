@@ -1,8 +1,7 @@
 package ca.mcmaster.se2aa4.island.team110.Interfaces;
 
-import org.json.JSONObject;
+import ca.mcmaster.se2aa4.island.team110.Models.Information;
 
 public interface Translator {
-  JSONObject translateJSon(String filepath);
-  
+    Information translateJson(String jsonContent);
 }
