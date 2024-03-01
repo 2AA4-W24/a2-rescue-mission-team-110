@@ -27,4 +27,20 @@ public class Information {
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
     }
+
+    public Map<Integer, Map<String,Object>> getEdgeProps() {
+        return edgeProps;
+    }
+
+    public Map<Integer,Map<String, Object>> getVertexProps() {
+        return vertexProps;
+    }
+
+    public Map<Integer, Map<String, Object>> getFaceProps() {
+        return faceProps;
+    }
+
+    public Mesh getMesh() {
+        return mesh;
+    }
 }

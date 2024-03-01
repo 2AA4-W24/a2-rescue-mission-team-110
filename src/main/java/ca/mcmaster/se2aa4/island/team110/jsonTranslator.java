@@ -37,7 +37,25 @@ public class JsonTranslator implements Translator {
 
     private Map<Integer, Map<String, Object>> parseProps(JSONArray array) {
         Map<Integer, Map<String, Object>> map = new HashMap<>();
-        // Parsing logic
+        
+            for (int i = 0; i< array.length(); i++){
+                JSONObject prop = array.getJSONObject(i);
+                int key = prop.getInt("key");
+                JSONArray vals = prop.getJSONArray("vals");
+
+                Map<String,Object> information = map.getOrDefault(key, new HashMap<>());
+                for (int j=0; j<vals.length(); j++){
+                    JSONObject val = vals.getJSONObject(j);
+                    String info = val.getString("p");
+                    Object value = val.get("v");
+                    information.put(info, value);
+                } 
+
+                map.put(key, information);
+            }
+
+
+
         return map;
     }
 
