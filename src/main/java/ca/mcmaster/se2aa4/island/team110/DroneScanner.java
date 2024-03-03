@@ -8,7 +8,7 @@ public class DroneScanner implements Scanner {
     public String scan() {
         JSONObject decision = new JSONObject();
         decision.put("action", "scan");
-        return decision.toString();
+        return decision.toString(); 
     }
 
 }
