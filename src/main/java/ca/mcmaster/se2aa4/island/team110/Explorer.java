@@ -8,9 +8,9 @@ import eu.ace_design.island.bot.IExplorerRaid;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import ca.mcmaster.se2aa4.island.team110.interfaces.Controller;
-import ca.mcmaster.se2aa4.island.team110.interfaces.Radar;
-import ca.mcmaster.se2aa4.island.team110.interfaces.Scanner;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Controller;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Radar;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Scanner;
 
 public class Explorer implements IExplorerRaid {
 

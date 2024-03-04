@@ -1,7 +1,7 @@
 package ca.mcmaster.se2aa4.island.team110;
 
 import org.json.JSONObject;
-import ca.mcmaster.se2aa4.island.team110.interfaces.Controller;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Controller;
 
 public class DroneController implements Controller {
     @Override
@@ -10,6 +10,7 @@ public class DroneController implements Controller {
         decision.put("action", "fly");
         return decision.toString();
     }
+    
     @Override
     public String turn(String direction) {
         JSONObject decision = new JSONObject();
