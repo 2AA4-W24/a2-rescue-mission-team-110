@@ -1,9 +1,5 @@
-package ca.mcmaster.se2aa4.island.team110.Interfaces;
-import ca.mcmaster.se2aa4.island.team110.Enums.Directions;
-import ca.mcmaster.se2aa4.island.team110.Enums.RadarResponse;
+package ca.mcmaster.se2aa4.island.team110.interfaces; 
 
 public interface Radar {
-
-    RadarResponse getEchoResponse(Directions direction);
-    
+    String echo(String direction);
 }
