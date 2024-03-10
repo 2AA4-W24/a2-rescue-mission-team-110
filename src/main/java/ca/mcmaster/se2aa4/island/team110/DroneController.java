@@ -10,6 +10,7 @@ public class DroneController implements Controller {
         decision.put("action", "fly");
         return decision.toString();
     }
+    
     @Override
     public String turn(String direction) {
         JSONObject decision = new JSONObject();

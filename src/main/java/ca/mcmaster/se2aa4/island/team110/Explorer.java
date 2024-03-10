@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.ace_design.island.bot.IExplorerRaid;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -18,6 +20,8 @@ public class Explorer implements IExplorerRaid {
     private Controller droneController;
     private Radar droneRadar;
     private Scanner droneScanner;
+
+    private boolean hasCurrentTileScan = false;
 
     public Explorer() {
         this.droneController = new DroneController();
@@ -39,8 +43,14 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
-        decision.put("action", "stop"); // we stop the exploration immediately
-        logger.info("** Decision: {}",decision.toString());
+        if(!hasCurrentTileScan){
+            decision = new JSONObject(droneScanner.scan());
+        } else{
+            decision.put("action", "fly"); //this is palceholder for now
+            hasCurrentTileScan = false;
+        }
+        
+        logger.info("** Decision: {}", decision.toString());
         return decision.toString();
     }
 
@@ -50,6 +60,21 @@ public class Explorer implements IExplorerRaid {
         logger.info("** Response received:\n"+response.toString(2));
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
+
+        String action = response.getString("action");
+        if(action.equals("scan")){
+            hasCurrentTileScan  = true;
+            if(response.has("extras")){
+                JSONObject scanResults = response.getJSONObject("extras");
+                if (scanResults != null && scanResults.has("biomes")){
+                    JSONArray biomes = scanResults.getJSONArray("biomes");
+                    if (biomes.isEmpty()){
+                        logger.info("We are above water.");
+                    }
+                }
+            }
+        }
+
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
         JSONObject extraInfo = response.getJSONObject("extras");
