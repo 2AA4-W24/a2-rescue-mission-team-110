@@ -48,26 +48,32 @@ public class Explorer implements IExplorerRaid {
 
         JSONObject decision  = new JSONObject();
         
-        String directionOfGround = droneRadar.echoMultiDirections();
-
-        if(!directionOfGround.equals("NONE")){
-            droneHeading.turn(directionOfGround);
-            decision.put("action", "turn");
-            decision.put("parameters", new JSONObject().put("direction", directionOfGround));
-
-        }  else if (!hasCurrentTileScan){
-            decision = new JSONObject(droneScanner.scan());
+        if (!hasCurrentTileScan){
+            decision= new JSONObject(droneScanner.scan());
             hasCurrentTileScan = true;
-            
         } else{
-            decision.put("action", "fly");
-            decision.put("parameters", new JSONObject().put("direction", droneHeading.getCurrentDirection()));
+            String directionOfGround = droneRadar.echoMultiDirections();
+
+            if(!directionOfGround.equals("NONE")){
+                droneHeading.turn(directionOfGround);
+                decision.put("action", "turn");
+                decision.put("parameters", new JSONObject().put("direction", directionOfGround));
+                decision = new JSONObject(droneScanner.scan());
+            }  else if (!hasCurrentTileScan){
+                decision = new JSONObject(droneScanner.scan());
+                hasCurrentTileScan = true;
+                
+            } else{
+                decision.put("action", "fly");
+                decision.put("parameters", new JSONObject().put("direction", droneHeading.getCurrentDirection()));
+                
+            }
+
             
         }
-
+        
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
-
 
     }
 
@@ -79,19 +85,7 @@ public class Explorer implements IExplorerRaid {
         logger.info("The cost of the action was {}", cost);
         
 
-        String action = response.getString("action");
-        if(action.equals("scan")){
-            if(response.has("extras")){
-                JSONObject scanResults = response.getJSONObject("extras");
-                if (scanResults != null && scanResults.has("biomes")){
-                    JSONArray biomes = scanResults.getJSONArray("biomes");
-                    if (biomes.isEmpty()){
-                        logger.info("We are above water.");
-                    }
-                }
-            }
-        }
-    
+        
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
         JSONObject extraInfo = response.getJSONObject("extras");
