@@ -20,6 +20,8 @@ public class Explorer implements IExplorerRaid {
     private Controller droneController;
     private Radar droneRadar;
     private Scanner droneScanner;
+    private DroneHeading heading;
+    private RelativeMap relativeMap;
 
     private boolean hasCurrentTileScan = false;
 
@@ -35,6 +37,8 @@ public class Explorer implements IExplorerRaid {
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Initialization info:\n {}",info.toString(2));
         String direction = info.getString("heading");
+        this.heading = new DroneHeading(direction);
+        
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
