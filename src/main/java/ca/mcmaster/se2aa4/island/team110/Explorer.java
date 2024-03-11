@@ -23,10 +23,13 @@ public class Explorer implements IExplorerRaid {
 
     private boolean hasCurrentTileScan = false;
 
+    private DroneHeading droneHeading;
+
     public Explorer() {
         this.droneController = new DroneController();
         this.droneRadar = new DroneRadar();
         this.droneScanner = new DroneScanner();
+        this.droneHeading = new DroneHeading("EAST");
     }
 
     @Override
@@ -42,16 +45,30 @@ public class Explorer implements IExplorerRaid {
 
     @Override
     public String takeDecision() {
-        JSONObject decision = new JSONObject();
-        if(!hasCurrentTileScan){
-            decision = new JSONObject(droneScanner.scan());
-        } else{
-            decision.put("action", "fly"); //this is palceholder for now
-            hasCurrentTileScan = false;
-        }
+
+        JSONObject decision  = new JSONObject();
         
+        String directionOfGround = droneRadar.echoMultiDirections();
+
+        if(!directionOfGround.equals("NONE")){
+            droneHeading.turn(directionOfGround);
+            decision.put("action", "turn");
+            decision.put("parameters", new JSONObject().put("direction", directionOfGround));
+
+        }  else if (!hasCurrentTileScan){
+            decision = new JSONObject(droneScanner.scan());
+            hasCurrentTileScan = true;
+            
+        } else{
+            decision.put("action", "fly");
+            decision.put("parameters", new JSONObject().put("direction", droneHeading.getCurrentDirection()));
+            
+        }
+
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
+
+
     }
 
     @Override
@@ -60,10 +77,10 @@ public class Explorer implements IExplorerRaid {
         logger.info("** Response received:\n"+response.toString(2));
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
+        
 
         String action = response.getString("action");
         if(action.equals("scan")){
-            hasCurrentTileScan  = true;
             if(response.has("extras")){
                 JSONObject scanResults = response.getJSONObject("extras");
                 if (scanResults != null && scanResults.has("biomes")){
@@ -74,7 +91,7 @@ public class Explorer implements IExplorerRaid {
                 }
             }
         }
-
+    
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
         JSONObject extraInfo = response.getJSONObject("extras");
