@@ -22,7 +22,7 @@ public class Explorer implements IExplorerRaid {
     private Scanner droneScanner;
 
     private boolean hasCurrentTileScan = false;
-    private boolean flyOrScan = false; //False means Scan, True means Fly
+    private boolean flyOrEcho = false; //False means Echo, True means Fly
     private boolean turn = false; //False means don't turn, True means turn (will turn True when scan finds ground)
 
 
@@ -49,7 +49,12 @@ public class Explorer implements IExplorerRaid {
         if(!hasCurrentTileScan){
             decision = new JSONObject(droneScanner.scan());
         } else{
-            decision.put("action", "fly"); //this is palceholder for now
+            if (flyOrEcho == false)
+                decision.put("action", "echo");
+                decision.put("parameters")
+            else {
+                decision.put("action", "fly");
+            } //this is palceholder for now
             hasCurrentTileScan = false;
         }
         
