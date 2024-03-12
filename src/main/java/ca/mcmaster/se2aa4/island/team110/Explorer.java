@@ -51,67 +51,46 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
-        // if (overGround) {
-        //     decision.put("action", "stop");
-        // }
-        // else if(!hasCurrentTileScan){
-        //     decision = new JSONObject(droneScanner.scan());
-        //     hasCurrentTileScan = true;
-        // }
-        // else if (foundGround && flyCount != rangeToGround) {
-        //     if (turn) {
-        //         decision.put("action", "heading");
-        //         decision.put("parameters", new JSONObject().put("directions", "S"));
-        //         turn = false;
-        //         flyCount++;
-        //     }
-        //     else {
-        //         decision.put("action", "fly");
-        //         flyCount++;
-        //         hasCurrentTileScan = false;
-        //     }
 
-        //     if (flyCount == rangeToGround) {
-        //         overGround = true;
-        //     }
-
-            
-
-        // }
-        // else {
-        //     if (!flyOrEcho && !foundGround) {
-        //         decision.put("action", "fly");
-        //         //decision.put("parameters", new JSONObject().put("directions", "S"));
-        //         flyOrEcho = true;
-        //     }
-        //     else if (flyOrEcho) {
-        //         decision.put("action", "fly");
-        //         flyOrEcho = false;
-        //         hasCurrentTileScan = false;
-        //     } //this is palceholder for now
-
-        //}
-
-        if (count == 0) {
-            decision.put("action", "scan");
-            count++;
-        }
-
-        else if (count == 1) {
-            decision.put("action", "fly");
-            count++;
-        }
-
-        else if (count == 2) {
-            decision.put("action", "scan");
-            count++;
-        }
-
-        else {
+        if (overGround) {
             decision.put("action", "stop");
         }
+        else if(!hasCurrentTileScan){
+            decision.put("action", "scan");
+            hasCurrentTileScan = true;
+        }
+        else if (foundGround) {
+            if (turn) {
+                decision.put("action", "heading");
+                decision.put("parameters", new JSONObject().put("direction", "S"));
+                turn = false;
+                flyCount++;
+            }
+            else {
+                decision.put("action", "fly");
+                flyCount++;
+                hasCurrentTileScan = false;
+            }
 
+            if (flyCount == rangeToGround) {
+                overGround = true;
+            }
+        
 
+        }
+        else {
+            if (!flyOrEcho) {
+                decision.put("action", "echo");
+                decision.put("parameters", new JSONObject().put("direction", "S"));
+                flyOrEcho = true;
+            }
+            else if (flyOrEcho) {
+                decision.put("action", "fly");
+                flyOrEcho = false;
+                hasCurrentTileScan = false;
+            } //this is palceholder for now
+
+        }
 
         
         logger.info("** Decision: {}", decision.toString());
@@ -126,22 +105,16 @@ public class Explorer implements IExplorerRaid {
         
 
         
-        // if(response.has("extras")) {
-        //     JSONObject extras = response.getJSONObject("extras");
-        //     if (extras != null && extras.has("found")) {
-        //         String found = extras.getString("found");
-        //         if (found.equals("GROUND")) {
-        //             turn = true;
-        //             foundGround = true;
-        //             rangeToGround = extras.getInt("range");
-        //         }
-        //         else {
-        //             turn = false;
-        //         }
-        //     }
-        // }
-        
-
+        JSONObject extras = response.optJSONObject("extras");
+        if (extras != null) {
+            String found = extras.optString("found");
+            if ("GROUND".equals(found)) {
+                turn = true;
+                foundGround = true;
+                logger.info("Found Ground");
+            }
+            
+        }
         
 
         Integer cost = response.getInt("cost");
