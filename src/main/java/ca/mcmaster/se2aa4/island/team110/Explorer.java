@@ -22,6 +22,9 @@ public class Explorer implements IExplorerRaid {
     private Scanner droneScanner;
 
     private boolean hasCurrentTileScan = false;
+    private boolean flyOrScan = false; //False means Scan, True means Fly
+    private boolean turn = false; //False means don't turn, True means turn (will turn True when scan finds ground)
+
 
     public Explorer() {
         this.droneController = new DroneController();
