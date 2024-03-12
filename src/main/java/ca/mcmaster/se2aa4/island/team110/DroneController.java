@@ -15,7 +15,7 @@ public class DroneController implements Controller {
     public String turn(String direction) {
         JSONObject decision = new JSONObject();
         decision.put("action", "heading");
-        decision.put("parameters", new JSONObject().put("directions", direction));
+        decision.put("parameters", new JSONObject().put("direction", direction));
         return decision.toString();
     }
 }

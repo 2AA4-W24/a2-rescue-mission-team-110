@@ -1,46 +1,46 @@
 package ca.mcmaster.se2aa4.island.team110;
 
-public class DroneHeading {
-  
-  private enum Heading{
-    NORTH, SOUTH, EAST, WEST;
-  }
+public enum DroneHeading {
+    NORTH("N"), 
+    SOUTH("S"), 
+    EAST("E"), 
+    WEST("W");
 
-  private Heading currDirection;
+    private String direction;
 
-  public DroneHeading(String initialDirection){
-    this.currDirection = parseCurrentDirection(initialDirection);
-  }
-
-  public void turn(String turnHeading){
-
-    switch(this.currDirection) {
-
-      case NORTH:
-        this.currDirection = "E".equals(turnHeading) ? Heading.EAST : Heading.WEST;
-        break;
-
-      case EAST:
-        this.currDirection = "N".equals(turnHeading) ? Heading.NORTH : Heading.SOUTH;
-        break;
-
-      case SOUTH:
-        this.currDirection = "E".equals(turnHeading) ? Heading.EAST : Heading.WEST;
-        break;
-
-      case WEST:
-        this.currDirection = "N".equals(turnHeading) ? Heading.NORTH : Heading.SOUTH;
+    private DroneHeading(String direction) {
+      this.direction = direction;
     }
-  }
 
-  
-  private Heading parseCurrentDirection(String direction) {
-    return Heading.valueOf(direction);
-  }
+    public static DroneHeading getHeading(String direction) {
+      switch(direction) {
+        case "N":
+          return NORTH;
+        case "S":
+          return SOUTH;
+        case "E":
+          return EAST;
+        case "W":
+          return WEST;
+        default:
+          return null;
+      }
+    }
 
-  public String getCurrentDirection(){
-    return currDirection.name();
-
-  }
-
+    public void turn(String turnHeading){
+        switch(this.direction) {
+            case "NORTH":
+                this.direction = "E".equals(turnHeading) ? EAST.name() : WEST.name();
+                break;
+            case "EAST":
+                this.direction = "N".equals(turnHeading) ? NORTH.name() : SOUTH.name();
+                break;
+            case "SOUTH":
+                this.direction = "E".equals(turnHeading) ? EAST.name() : WEST.name();
+                break;
+            case "WEST":
+                this.direction = "N".equals(turnHeading) ? NORTH.name() : SOUTH.name();
+                break;
+        }
+    }
 }
