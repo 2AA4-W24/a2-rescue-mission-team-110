@@ -51,15 +51,14 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
-
         if (overGround) {
             decision.put("action", "stop");
         }
         else if(!hasCurrentTileScan){
-            decision.put("action", "scan");
+            decision = new JSONObject(droneScanner.scan());
             hasCurrentTileScan = true;
         }
-        else if (foundGround) {
+        else if (foundGround && flyCount != rangeToGround) {
             if (turn) {
                 decision.put("action", "heading");
                 decision.put("parameters", new JSONObject().put("direction", "S"));
@@ -75,11 +74,12 @@ public class Explorer implements IExplorerRaid {
             if (flyCount == rangeToGround) {
                 overGround = true;
             }
-        
+
+
 
         }
         else {
-            if (!flyOrEcho) {
+            if (!flyOrEcho && !foundGround) {
                 decision.put("action", "echo");
                 decision.put("parameters", new JSONObject().put("direction", "S"));
                 flyOrEcho = true;
@@ -92,7 +92,8 @@ public class Explorer implements IExplorerRaid {
 
         }
 
-        
+
+
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
     }
@@ -103,17 +104,19 @@ public class Explorer implements IExplorerRaid {
         logger.info("** Response received:\n"+response.toString(2));
 
         
-
-        
-        JSONObject extras = response.optJSONObject("extras");
-        if (extras != null) {
-            String found = extras.optString("found");
-            if ("GROUND".equals(found)) {
-                turn = true;
-                foundGround = true;
-                logger.info("Found Ground");
+        if(response.has("extras")) {
+            JSONObject extras = response.getJSONObject("extras");
+            if (extras != null && extras.has("found")) {
+                String found = extras.getString("found");
+                if (found.equals("GROUND")) {
+                    turn = true;
+                    foundGround = true;
+                    rangeToGround = extras.getInt("range");
+                }
+                else {
+                    turn = false;
+                }
             }
-            
         }
         
 
