@@ -15,7 +15,7 @@ public class DroneController implements Controller {
     public String turn(String direction) {
         JSONObject decision = new JSONObject();
         decision.put("action", "heading");
-        decision.put("direction", direction);
+        decision.put("parameters", new JSONObject().put("directions", direction)); // direction should be enum of N,S,E or W change this
         return decision.toString();
     }
 }
