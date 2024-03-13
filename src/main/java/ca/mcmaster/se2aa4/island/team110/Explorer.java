@@ -52,15 +52,20 @@ public class Explorer implements IExplorerRaid {
     public String takeDecision() {
         JSONObject decision = new JSONObject();
         
-        currentPhase = new PhaseOne();
+        if (currentPhase == null){
+            currentPhase = new PhaseOne();
+        }
+        
 
         if(currentPhase.reachedEnd()){
             currentPhase = currentPhase.getNextPhase();
         }
 
         String decisionAction = currentPhase.getNextDecision();
+        JSONObject actionDecision = new JSONObject(decisionAction);
 
-        decision.put("action", decisionAction);
+        decision.put("action", actionDecision.get("action"));
+        decision.put("parameters", actionDecision.getJSONObject("parameters"));
         
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
