@@ -1,6 +1,8 @@
 package ca.mcmaster.se2aa4.island.team110;
 
 import java.io.StringReader;
+
+import org.apache.bcel.generic.INSTANCEOF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Controller;
+import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Radar;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Scanner;
 
@@ -22,16 +25,9 @@ public class Explorer implements IExplorerRaid {
     private Scanner droneScanner;
     private DroneHeading droneHeading;
     private RelativeMap relativeMap;
+    private Phase currentPhase;
 
     private boolean hasCurrentTileScan = false;
-    private boolean flyOrEcho = false; //False means Echo, True means Fly
-    private boolean turn = false; //False means don't turn, True means turn (will turn True when scan finds ground)
-    private boolean foundGround = false;
-    private int rangeToGround = 0;
-    private int flyCount = 0;
-    private boolean overGround = false;
-    private int count = 0;
-
 
     public Explorer() {
         this.droneController = new DroneController();
@@ -56,49 +52,17 @@ public class Explorer implements IExplorerRaid {
     public String takeDecision() {
         JSONObject decision = new JSONObject();
 
-        if (overGround) {
-            decision.put("action", "stop");
-        }
-        else if(!hasCurrentTileScan){
-            decision = new JSONObject(droneScanner.scan());
-            hasCurrentTileScan = true;
-        }
-        else if (foundGround && flyCount != rangeToGround) {
-            if (turn) {
-                decision.put("action", "heading");
-                decision.put("parameters", new JSONObject().put("direction", "S"));
-                turn = false;
-                flyCount++;
-            }
-            else {
-                decision.put("action", "fly");
-                flyCount++;
-                hasCurrentTileScan = false;
-            }
+        
+        currentPhase = new PhaseOne();
 
-            if (flyCount == rangeToGround) {
-                overGround = true;
-            }
-
-
-
-        }
-        else {
-            if (!flyOrEcho && !foundGround) {
-                decision.put("action", "echo");
-                decision.put("parameters", new JSONObject().put("direction", "S"));
-                flyOrEcho = true;
-            }
-            else if (flyOrEcho) {
-                decision.put("action", "fly");
-                flyOrEcho = false;
-                hasCurrentTileScan = false;
-            } //this is palceholder for now
-
+        if(currentPhase.reachedEnd()){
+            currentPhase = currentPhase.getNextPhase();
         }
 
+        String decisionAction = currentPhase.getNextDecision();
 
-
+        decision.put("action", decisionAction);
+        
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
     }
@@ -113,26 +77,31 @@ public class Explorer implements IExplorerRaid {
         if(response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras != null && extras.has("found")) {
-                String found = extras.getString("found");
-                if (found.equals("GROUND")) {
-                    turn = true;
-                    foundGround = true;
-                    rangeToGround = extras.getInt("range");
-                }
-                else {
-                    turn = false;
+                if("GROUND".equals(extras.getString("found"))){
+                    int range = extras.getInt("range");
+                    if(currentPhase instanceof PhaseOne){
+                        ((PhaseOne) currentPhase).groundResponse(true);
+                        currentPhase = currentPhase.getNextPhase();
+                        if(currentPhase instanceof PhaseTwo) {
+                            ((PhaseTwo) currentPhase).setRangeToGround(range);
+                        }
+                    }
+                } else{
+                    if (currentPhase instanceof PhaseOne) {
+                        ((PhaseOne) currentPhase).groundResponse(false);
+                    }
                 }
             }
         }
-        
+
+
+
 
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
 
+
     
-        // if(action.equals("scan")){
-        //     hasCurrentTileScan  = true;
-       
 
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
