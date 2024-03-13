@@ -64,8 +64,13 @@ public class Explorer implements IExplorerRaid {
         String decisionAction = currentPhase.getNextDecision();
         JSONObject actionDecision = new JSONObject(decisionAction);
 
-        decision.put("action", actionDecision.get("action"));
-        decision.put("parameters", actionDecision.getJSONObject("parameters"));
+        if (actionDecision.getString("action").equals("echo")){
+            decision.put("action", actionDecision.get("action"));
+            decision.put("parameters", actionDecision.getJSONObject("parameters"));
+        } else{
+            decision.put("action", actionDecision.get("action"));
+        }
+        
         
         logger.info("** Decision: {}", decision.toString());
         return decision.toString();
@@ -93,7 +98,8 @@ public class Explorer implements IExplorerRaid {
                     }
                 } else{
                     if (currentPhase instanceof PhaseOne) {
-                        ((PhaseOne) currentPhase).groundResponse(false);
+                        ((PhaseOne) currentPhase).setToFly();
+                        
                     }
                 }
             }
