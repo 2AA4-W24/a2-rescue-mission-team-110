@@ -8,7 +8,7 @@ public class DroneRadar implements Radar {
     public String echo(String direction) {
         JSONObject decision = new JSONObject();
         decision.put("action", "echo");
-        decision.put("parameters", new JSONObject().put("directions", direction)); // direction should be enum of N,S,E or W change this
+        decision.put("parameters", new JSONObject().put("direction", direction)); // direction should be enum of N,S,E or W change this
         return decision.toString();
     }
 }
