@@ -6,10 +6,9 @@ public enum DroneHeading {
     EAST("E"), 
     WEST("W");
 
-    private String direction;
-
+   
     private DroneHeading(String direction) {
-      this.direction = direction;
+
     }
 
     public static DroneHeading getHeading(String direction) {
@@ -22,25 +21,49 @@ public enum DroneHeading {
           return EAST;
         case "W":
           return WEST;
-        default:
+        default:  
           return null;
       }
     }
 
-    public void turn(String turnHeading){
+    public DroneHeading turn(String turnHeading){
+        switch(turnHeading) {
+          case "LEFT":
+            return turnLeft();
+          case "RIGHT":
+            return turnRight();
+          default:
+            return this; 
+        }
+    }
+
+    private DroneHeading turnLeft() {
         switch(this) {
-            case NORTH:
-                this.direction = turnHeading.equals("E") ? EAST.direction : WEST.direction;
-                break;
-            case EAST:
-                this.direction = "N".equals(turnHeading) ? NORTH.direction : SOUTH.direction;
-                break;
-            case SOUTH:
-                this.direction = "E".equals(turnHeading) ? EAST.direction : WEST.direction;
-                break;
-            case WEST:
-                this.direction = "N".equals(turnHeading) ? NORTH.direction : SOUTH.direction;
-                break;
+          case NORTH:
+            return WEST;
+          case SOUTH:
+            return EAST;
+          case EAST:
+            return NORTH;
+          case WEST:
+            return SOUTH;
+          default:
+            return this;
+        }
+    }
+
+    private DroneHeading turnRight() {
+        switch(this) {
+          case NORTH:
+            return EAST;
+          case SOUTH:
+            return WEST;
+          case EAST:
+            return SOUTH;
+          case WEST:
+            return NORTH;
+          default:
+            return this;
         }
     }
 }

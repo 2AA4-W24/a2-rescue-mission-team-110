@@ -8,86 +8,57 @@ public class DroneHeadingTest {
     @Test
     void testTurnFromNorthToEast() {
         DroneHeading droneHeading = DroneHeading.NORTH;
-        droneHeading.turn("E");
-        assertEquals(DroneHeading.EAST, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("RIGHT");
+        assertEquals(DroneHeading.EAST, newHeading);
     }
 
     @Test
     void testTurnFromNorthToWest() {
         DroneHeading droneHeading = DroneHeading.NORTH;
-        droneHeading.turn("W");
-        assertEquals(DroneHeading.WEST, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("LEFT");
+        assertEquals(DroneHeading.WEST, newHeading);
     }
 
     @Test
     void testTurnFromEastToNorth() {
         DroneHeading droneHeading = DroneHeading.EAST;
-        droneHeading.turn("N");
-        assertEquals(DroneHeading.NORTH, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("LEFT");
+        assertEquals(DroneHeading.NORTH, newHeading);
     }
 
     @Test
     void testTurnFromEastToSouth() {
         DroneHeading droneHeading = DroneHeading.EAST;
-        droneHeading.turn("W");
-        assertEquals(DroneHeading.SOUTH, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("RIGHT");
+        assertEquals(DroneHeading.SOUTH, newHeading);
     }
 
     @Test
     void testTurnFromSouthToEast() {
         DroneHeading droneHeading = DroneHeading.SOUTH;
-        droneHeading.turn("E");
-        assertEquals(DroneHeading.EAST, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("LEFT");
+        assertEquals(DroneHeading.EAST, newHeading);
     }
 
     @Test
     void testTurnFromSouthToWest() {
         DroneHeading droneHeading = DroneHeading.SOUTH;
-        droneHeading.turn("W");
-        assertEquals(DroneHeading.WEST, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("RIGHT");
+        assertEquals(DroneHeading.WEST, newHeading);
     }
 
     @Test
     void testTurnFromWestToNorth() {
         DroneHeading droneHeading = DroneHeading.WEST;
-        droneHeading.turn("N");
-        assertEquals(DroneHeading.NORTH, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("RIGHT");
+        assertEquals(DroneHeading.NORTH, newHeading);
     }
 
     @Test
     void testTurnFromWestToSouth() {
         DroneHeading droneHeading = DroneHeading.WEST;
-        droneHeading.turn("W");
-        assertEquals(DroneHeading.SOUTH, droneHeading);
-    }
-
-    // Clockwise turning of cardinal directions
-    @Test
-    void testTurnClockwiseFromNorthToSouth() {
-        DroneHeading droneHeading = DroneHeading.NORTH;
-        droneHeading.turn("S");
-        assertEquals(DroneHeading.EAST, droneHeading);
-    }
-
-    @Test
-    void testTurnClockwiseFromSouthToNorth() {
-        DroneHeading droneHeading = DroneHeading.SOUTH;
-        droneHeading.turn("N");
-        assertEquals(DroneHeading.WEST, droneHeading);
-    }
-
-    @Test
-    void testTurnClockwiseFromEastToWest() {
-        DroneHeading droneHeading = DroneHeading.EAST;
-        droneHeading.turn("W");
-        assertEquals(DroneHeading.SOUTH, droneHeading);
-    }
-
-    @Test
-    void testTurnClockwiseFromWestToEast() {
-        DroneHeading droneHeading = DroneHeading.WEST;
-        droneHeading.turn("E");
-        assertEquals(DroneHeading.NORTH, droneHeading);
+        DroneHeading newHeading = droneHeading.turn("LEFT");
+        assertEquals(DroneHeading.SOUTH, newHeading);
     }
 
 }

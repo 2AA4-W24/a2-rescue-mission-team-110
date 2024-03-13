@@ -36,7 +36,7 @@ public class PhaseOne implements Phase{
     } 
     else if (currentState == State.TURN){
       currentState = State.FLY;
-      return droneController.turn("S");
+      return droneController.turn("RIGHT");
     } 
     else {
       return droneController.fly();
