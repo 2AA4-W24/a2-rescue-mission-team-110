@@ -55,6 +55,7 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
+
         if (overGround) {
             decision.put("action", "stop");
         }
@@ -106,6 +107,7 @@ public class Explorer implements IExplorerRaid {
     public void acknowledgeResults(String s) {
         JSONObject response = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Response received:\n"+response.toString(2));
+
 
         
         if(response.has("extras")) {
