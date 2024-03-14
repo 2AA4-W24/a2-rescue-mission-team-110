@@ -1,5 +1,6 @@
 package ca.mcmaster.se2aa4.island.team110;
 
+import org.apache.xalan.templates.ElemSort;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
@@ -21,6 +22,10 @@ public class PhaseOne implements Phase{
 
   public PhaseOne(){
     this.currentState = State.FIND_GROUND;
+
+  public void setToFly() {
+    this.currentState = State.FLY;
+
   }
 
   @Override
@@ -38,10 +43,14 @@ public class PhaseOne implements Phase{
       currentState = State.FLY;
       return droneController.turn("RIGHT");
     } 
-    else {
+    else if (currentState == State.FLY){
+      currentState = State.FIND_GROUND;
+      return droneController.fly();
+    } else{
       return droneController.fly();
     }
       
+
   }
 
   public void groundResponse(boolean groundFound) {
