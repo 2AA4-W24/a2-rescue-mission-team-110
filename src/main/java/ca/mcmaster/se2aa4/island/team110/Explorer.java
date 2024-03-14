@@ -105,6 +105,8 @@ public class Explorer implements IExplorerRaid {
                     else if (((PhaseOne) currentPhase).reachedEnd()) {
                         currentPhase = currentPhase.getNextPhase();
                         
+                    } else if (currentPhase instanceof PhaseThree){
+                        ((PhaseThree) currentPhase).canUTurn(response.getString("found"));
                     }
                 }
             }else if(extras.has("biomes")){

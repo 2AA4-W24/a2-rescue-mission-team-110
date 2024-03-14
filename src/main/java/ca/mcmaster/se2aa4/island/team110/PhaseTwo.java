@@ -50,11 +50,11 @@ public class PhaseTwo implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return null;
+    return new PhaseThree();
   }
 
   @Override
   public boolean isFinal() {
-    return true;
+    return false;
   }
 }
