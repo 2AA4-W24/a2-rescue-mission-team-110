@@ -22,10 +22,10 @@ public class PhaseOne implements Phase{
 
   public PhaseOne(){
     this.currentState = State.FIND_GROUND;
-  }
 
   public void setToFly() {
     this.currentState = State.FLY;
+
   }
 
   @Override
@@ -49,7 +49,6 @@ public class PhaseOne implements Phase{
     } else{
       return droneController.fly();
     }
-      
       
 
   }

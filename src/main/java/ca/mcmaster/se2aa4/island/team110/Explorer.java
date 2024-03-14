@@ -51,6 +51,7 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
+
         
         if (currentPhase == null){
             currentPhase = new PhaseOne();
@@ -82,8 +83,7 @@ public class Explorer implements IExplorerRaid {
         logger.info("** Response received:\n"+response.toString(2));
 
 
-
-
+        
         if(response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras != null && extras.has("found")) {
