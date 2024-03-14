@@ -20,9 +20,10 @@ public class PhaseOne implements Phase{
   private boolean groundDetected = false;
   
 
-  public PhaseOne(){
+  public PhaseOne() { 
     this.currentState = State.FIND_GROUND;
-
+  
+  }
   public void setToFly() {
     this.currentState = State.FLY;
 

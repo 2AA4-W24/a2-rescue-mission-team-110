@@ -43,6 +43,7 @@ public class Explorer implements IExplorerRaid {
         String direction = info.getString("heading");
         droneHeading = DroneHeading.getHeading(direction);
         relativeMap = new RelativeMap(droneHeading);
+
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
