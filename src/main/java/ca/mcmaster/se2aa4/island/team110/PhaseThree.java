@@ -30,35 +30,12 @@ public class PhaseThree implements Phase {
   public boolean reachedEnd() {
     return isOutOfRange;
   }
-
-
-  @Override
-  public String getNextDecision () {
-    switch(currentState){
-      case ECHO:
-        currentState = State.FLY;
-        return droneRadar.echo("S");
-      case FLY:
-        currentState = State.SCAN;
-        return droneController.fly();
-      case SCAN:
-        currentState = State.ECHO;
-        return droneScanner.scan();
-      case U_TURN:
-        return makeUTurn();
-      default:
-        return null;
-    }
-  }
   
   public void canUTurn(String response){
     if ("OUT_OF_RANGE".equals(response)){
-      if(currentState == State.FLY && turnStage == 0){
-        currentState = State.U_TURN;
-      }
-      else{
-        currentState = State.FLY;
-      }
+      currentState = State.U_TURN;
+    }else{
+      currentState = State.FLY;
     }
   }
 
@@ -89,6 +66,29 @@ public class PhaseThree implements Phase {
         return null;
     }
   }
+
+  @Override
+  public String getNextDecision () {
+    switch(currentState){
+      case ECHO:
+      currentState = State.FLY;
+        return droneRadar.echo("S");
+      case FLY:
+        currentState = State.SCAN;
+        return droneController.fly();
+      case SCAN:
+        currentState = State.ECHO;
+        return droneScanner.scan();
+      case U_TURN:
+        return makeUTurn();
+      default:
+        return null;
+    }
+  }
+  
+  
+
+  
 
   @Override
   public Phase getNextPhase() {

@@ -99,14 +99,16 @@ public class Explorer implements IExplorerRaid {
                 
                 else{
                     if (currentPhase instanceof PhaseOne) {
-                        ((PhaseOne) currentPhase).setToFly();
-                        
+                        PhaseOne phaseOne = (PhaseOne) currentPhase;
+                        if(phaseOne.reachedEnd()) {
+                            currentPhase = currentPhase.getNextPhase();
+                        } else {
+                            phaseOne.setToFly();
+                        }
                     }
-                    else if (((PhaseOne) currentPhase).reachedEnd()) {
-                        currentPhase = currentPhase.getNextPhase();
-                        
-                    } else if (currentPhase instanceof PhaseThree){
-                        ((PhaseThree) currentPhase).canUTurn(response.getString("found"));
+                     else if (currentPhase instanceof PhaseThree){
+                        logger.info("IS THIS WORKING!");
+                        ((PhaseThree) currentPhase).canUTurn(extras.getString("found"));
                     }
                 }
             }else if(extras.has("biomes")){
