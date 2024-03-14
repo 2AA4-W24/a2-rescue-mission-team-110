@@ -18,6 +18,7 @@ public class PhaseOne implements Phase{
 
 
   private boolean groundDetected = false;
+  private boolean turnCompleted = false;
   
 
   public PhaseOne(){
@@ -30,7 +31,7 @@ public class PhaseOne implements Phase{
 
   @Override
   public boolean reachedEnd() {
-    return groundDetected && currentState == State.FLY;
+    return turnCompleted;
   }
 
   @Override
@@ -41,7 +42,8 @@ public class PhaseOne implements Phase{
     } 
     else if (currentState == State.GO_TO_GROUND){
       currentState = State.FLY;
-      return droneController.turn("RIGHT");
+      turnCompleted = true;
+      return droneController.turn("S");
     } 
     else if (currentState == State.FLY){
       currentState = State.FIND_GROUND;

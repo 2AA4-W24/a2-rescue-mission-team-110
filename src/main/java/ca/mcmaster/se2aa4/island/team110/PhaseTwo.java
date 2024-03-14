@@ -7,25 +7,41 @@ import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 public class PhaseTwo implements Phase {
 
   private DroneController droneController = new DroneController();
+  private DroneScanner droneScanner = new DroneScanner();
+  private State currentState;
 
-  private int rangeToGround;
-  private int flyCount = 0;
-
-  public void setRangeToGround(int range){
-    this.rangeToGround = range;
-  }
+  private boolean hasScanGround = false;
   
+
+  private enum State{
+    FLY, SCAN
+  }
+
+  public void setHasScanGround(boolean hasScanGround) {
+    this.hasScanGround= hasScanGround;
+  }
+
+  
+  public PhaseTwo(){
+    this.currentState = State.SCAN;
+  }
 
   @Override
   public boolean reachedEnd() {
-    return flyCount == rangeToGround;
+    return hasScanGround;
   }
 
   @Override
   public String getNextDecision () {
-    if (flyCount< rangeToGround){
-      flyCount++;
-      return droneController.fly();
+    if (!hasScanGround){
+      if (currentState == State.SCAN){
+        currentState = State.FLY;
+        return droneScanner.scan();
+      }else{
+        currentState = State.SCAN;
+        return droneController.fly();
+      }
+      
     }
     return null;
     

@@ -64,7 +64,7 @@ public class Explorer implements IExplorerRaid {
         String decisionAction = currentPhase.getNextDecision();
         JSONObject actionDecision = new JSONObject(decisionAction);
 
-        if (actionDecision.getString("action").equals("echo")){
+        if (actionDecision.getString("action").equals("echo") || actionDecision.getString("action").equals("heading")){
             decision.put("action", actionDecision.get("action"));
             decision.put("parameters", actionDecision.getJSONObject("parameters"));
         } else{
@@ -88,22 +88,35 @@ public class Explorer implements IExplorerRaid {
             JSONObject extras = response.getJSONObject("extras");
             if (extras != null && extras.has("found")) {
                 if("GROUND".equals(extras.getString("found"))){
-                    int range = extras.getInt("range");
                     if(currentPhase instanceof PhaseOne){
                         ((PhaseOne) currentPhase).groundResponse(true);
-                        currentPhase = currentPhase.getNextPhase();
-                        if(currentPhase instanceof PhaseTwo) {
-                            ((PhaseTwo) currentPhase).setRangeToGround(range);
+                        if (((PhaseOne) currentPhase).reachedEnd()) {
+                            currentPhase = currentPhase.getNextPhase();
+                            
                         }
                     }
-                } else{
+                } 
+                
+                else{
                     if (currentPhase instanceof PhaseOne) {
                         ((PhaseOne) currentPhase).setToFly();
                         
                     }
+                    else if (((PhaseOne) currentPhase).reachedEnd()) {
+                        currentPhase = currentPhase.getNextPhase();
+                        
+                    }
                 }
+            }else if(extras.has("biomes")){
+                JSONArray biomes = extras.getJSONArray("biomes");
+                if (!(biomes.length()== 1 && "OCEAN".equals(biomes.getString(0)))){
+                    if (currentPhase instanceof PhaseTwo) {
+                        ((PhaseTwo) currentPhase).setHasScanGround(true);
+                    }
+                }
+                
             }
-        }
+        } 
 
 
 
