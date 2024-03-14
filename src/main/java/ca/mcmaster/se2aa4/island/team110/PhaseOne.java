@@ -1,27 +1,25 @@
 package ca.mcmaster.se2aa4.island.team110;
 
-import org.apache.xalan.templates.ElemSort;
-import org.json.JSONObject;
-
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 
 public class PhaseOne implements Phase{
 
   
   private enum State{
-    FIND_GROUND, GO_TO_GROUND, FLY
+    ECHO, TURN, FLY, SCAN
   }
 
   private DroneController droneController = new DroneController();
   private DroneRadar droneRadar = new DroneRadar();
   private State currentState;
 
+  private DroneScanner droneScanner = new DroneScanner();
 
   private boolean groundDetected = false;
   
 
   public PhaseOne(){
-    this.currentState = State.FIND_GROUND;
+    this.currentState = State.FLY;
   }
 
   public void setToFly() {
@@ -35,16 +33,20 @@ public class PhaseOne implements Phase{
 
   @Override
   public String getNextDecision () {
-    if(currentState == State.FIND_GROUND ){
-      currentState = State.FLY;
-      return droneRadar.echo("S");
+    if (currentState ==State.FLY){
+      currentState = State.SCAN;
+      return droneController.fly();
+    }
+    else if(currentState == State.SCAN ){
+      currentState = State.ECHO;
+      return droneScanner.scan();
     } 
-    else if (currentState == State.GO_TO_GROUND){
+    else if (currentState == State.TURN){
       currentState = State.FLY;
       return droneController.turn("RIGHT");
     } 
-    else if (currentState == State.FLY){
-      currentState = State.FIND_GROUND;
+    else if (currentState == State.ECHO){
+      currentState = State.FLY;
       return droneController.fly();
     } else{
       return droneController.fly();
@@ -57,7 +59,7 @@ public class PhaseOne implements Phase{
   public void groundResponse(boolean groundFound) {
     groundDetected = groundFound;
     if (groundDetected){
-      currentState = State.GO_TO_GROUND;
+      currentState = State.TURN;
     } else{
       currentState = State.FLY;
     }

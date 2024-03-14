@@ -67,7 +67,8 @@ public class Explorer implements IExplorerRaid {
         if (actionDecision.getString("action").equals("echo")){
             decision.put("action", actionDecision.get("action"));
             decision.put("parameters", actionDecision.getJSONObject("parameters"));
-        } else{
+        } 
+        else{
             decision.put("action", actionDecision.get("action"));
         }
         
@@ -98,8 +99,10 @@ public class Explorer implements IExplorerRaid {
                     }
                 } else{
                     if (currentPhase instanceof PhaseOne) {
-                        ((PhaseOne) currentPhase).setToFly();
-                        
+                        ((PhaseOne) currentPhase).setToFly();  
+                    } else if (currentPhase instanceof PhaseThree){
+                        boolean foundGround = "GROUND".equals(extras.getString("found"));
+                        ((PhaseThree) currentPhase).updateLastEchoFoundGround(foundGround);
                     }
                 }
             }
