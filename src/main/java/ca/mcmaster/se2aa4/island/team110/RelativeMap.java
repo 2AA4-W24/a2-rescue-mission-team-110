@@ -1,20 +1,26 @@
 package ca.mcmaster.se2aa4.island.team110;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
+import ca.mcmaster.se2aa4.island.team110.TileType;
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class RelativeMap {
 
-    private HashMap<Point, String> map;
+    private final Logger logger = LogManager.getLogger();
+    private Map<Point, TileType> relative_map;
     Point current_position;
     DroneHeading heading;
-
+    
     public RelativeMap (DroneHeading heading) {
+        relative_map = new HashMap<>();
         this.current_position = new Point(0, 0);
         this.heading = heading;
-        map = new HashMap<>();
+        relative_map.put(new Point(0, 0), TileType.UNKNOWN);
 
     }
 
@@ -32,9 +38,9 @@ public class RelativeMap {
         
     }
 
-    public void addTile(int x, int y, String tileType){
+    public void addTile(int x, int y, TileType tileType){
         Point newTile = new Point(x, y);
-        map.put(newTile, tileType);
+        relative_map.put(newTile, tileType);
 
     }
 

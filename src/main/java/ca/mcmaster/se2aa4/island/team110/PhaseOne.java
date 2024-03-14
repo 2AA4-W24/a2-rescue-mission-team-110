@@ -8,7 +8,7 @@ public class PhaseOne implements Phase{
 
   
   private enum State{
-    ECHO, TURN, FLY
+    FIND_GROUND, GO_TO_GROUND, FLY
   }
 
   private DroneController droneController = new DroneController();
@@ -20,7 +20,7 @@ public class PhaseOne implements Phase{
   
 
   public PhaseOne(){
-    this.currentState = State.ECHO;
+    this.currentState = State.FIND_GROUND;
   }
 
   @Override
@@ -30,11 +30,11 @@ public class PhaseOne implements Phase{
 
   @Override
   public String getNextDecision () {
-    if(currentState == State.ECHO ){
+    if(currentState == State.FIND_GROUND ){
       currentState = State.FLY;
       return droneRadar.echo("S");
     } 
-    else if (currentState == State.TURN){
+    else if (currentState == State.GO_TO_GROUND){
       currentState = State.FLY;
       return droneController.turn("RIGHT");
     } 
@@ -42,13 +42,12 @@ public class PhaseOne implements Phase{
       return droneController.fly();
     }
       
-
   }
 
   public void groundResponse(boolean groundFound) {
     groundDetected = groundFound;
     if (groundDetected){
-      currentState = State.TURN;
+      currentState = State.GO_TO_GROUND;
     } else{
       currentState = State.FLY;
     }
