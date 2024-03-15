@@ -82,7 +82,7 @@ public class Explorer implements IExplorerRaid {
         logger.info("** Response received:\n"+response.toString(2));
 
 
-
+        
 
         if(response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
@@ -107,9 +107,14 @@ public class Explorer implements IExplorerRaid {
                         }
                     }
                      else if (currentPhase instanceof PhaseThree){
-                        logger.info("IS THIS WORKING!");
-                        ((PhaseThree) currentPhase).canUTurn(extras.getString("found"));
-                    }
+                        PhaseThree phaseThree = (PhaseThree) currentPhase;
+                        phaseThree.canUTurn(extras.getString("found"));
+
+                        if ("OUT_OF_RANGE".equals(extras.getString("found")) && phaseThree.checkEchoAfterTurn){
+                            phaseThree.processEchoResultAfterUTurn(extras.getString("echo"));
+                        }
+
+                    } 
                 }
             }else if(extras.has("biomes")){
                 JSONArray biomes = extras.getJSONArray("biomes");

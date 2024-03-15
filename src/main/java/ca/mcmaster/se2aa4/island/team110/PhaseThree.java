@@ -16,6 +16,8 @@ public class PhaseThree implements Phase {
   
 
   private boolean isOutOfRange = false;
+  public boolean checkEchoAfterTurn = false;
+
 
   private enum State{
     ECHO, FLY, SCAN, U_TURN
@@ -34,7 +36,8 @@ public class PhaseThree implements Phase {
   public void canUTurn(String response){
     if ("OUT_OF_RANGE".equals(response)){
       currentState = State.U_TURN;
-    }else{
+    }
+    else{
       currentState = State.FLY;
     }
   }
@@ -51,14 +54,14 @@ public class PhaseThree implements Phase {
         turnStage++;
         return droneController.fly();
       case 3:
+      turnStage = 0;
+      checkEchoAfterTurn = true;
         if (currentDriection == Direction.S){
           currentDriection = Direction.N;
-          turnStage = 0;
           currentState = State.ECHO;
           return droneController.turn("N");
         } else if (currentDriection == Direction.N){
           currentDriection = Direction.S;
-          turnStage = 0;
           currentState = State.ECHO;
           return droneController.turn("S");
         }
@@ -69,22 +72,39 @@ public class PhaseThree implements Phase {
 
   @Override
   public String getNextDecision () {
-    switch(currentState){
-      case ECHO:
-      currentState = State.FLY;
-        return droneRadar.echo("S");
-      case FLY:
-        currentState = State.SCAN;
-        return droneController.fly();
-      case SCAN:
-        currentState = State.ECHO;
-        return droneScanner.scan();
-      case U_TURN:
-        return makeUTurn();
-      default:
-        return null;
+    if (checkEchoAfterTurn){
+      checkEchoAfterTurn = false;
+      currentState = State.ECHO;
+      return droneRadar.echo(currentDriection == Direction.N ? "N" : "S");
+    } else{
+      switch(currentState){
+        case ECHO:
+          currentState = State.FLY;
+          if (currentDriection == Direction.N){
+            return droneRadar.echo("N");
+          }else{
+            return droneRadar.echo("S");
+          }
+        case FLY:
+          currentState = State.SCAN;
+          return droneController.fly();
+        case SCAN:
+          currentState = State.ECHO;
+          return droneScanner.scan();
+        case U_TURN:
+          return makeUTurn();
+        default:
+          return null;
+      }
     }
+    
   }
+
+  public void processEchoResultAfterUTurn(String response) {
+    if ("OUT_OF_RANGE".equals(response) &&checkEchoAfterTurn) {
+        isOutOfRange = true;
+    }
+}
   
   
 
