@@ -37,6 +37,7 @@ public class FindGround implements Phase {
 
   @Override
   public String getNextDecision() {
+    logger.info("Phase: FindGround");
     switch (current) {
       case FIND_GROUND:
         // Echo south, change state
