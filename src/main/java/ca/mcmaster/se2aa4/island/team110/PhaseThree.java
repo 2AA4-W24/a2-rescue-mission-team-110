@@ -17,6 +17,7 @@ public class PhaseThree implements Phase {
 
   private boolean isOutOfRange = false;
   public boolean checkEchoAfterTurn = false;
+  
 
 
   private enum State{
@@ -54,17 +55,20 @@ public class PhaseThree implements Phase {
         turnStage++;
         return droneController.fly();
       case 3:
-      turnStage = 0;
-      checkEchoAfterTurn = true;
-        if (currentDriection == Direction.S){
-          currentDriection = Direction.N;
-          currentState = State.ECHO;
-          return droneController.turn("N");
-        } else if (currentDriection == Direction.N){
-          currentDriection = Direction.S;
-          currentState = State.ECHO;
-          return droneController.turn("S");
-        }
+        turnStage++;
+          if (currentDriection == Direction.S){
+            currentDriection = Direction.N;
+            return droneController.turn("N");
+          } else if (currentDriection == Direction.N){
+            currentDriection = Direction.S;
+            currentState = State.ECHO;
+            return droneController.turn("S");
+          }
+      case 4:
+        turnStage = 0;
+        checkEchoAfterTurn = true;
+        currentState = State.FLY;
+        return droneRadar.echo(currentDriection == Direction.N ? "N" : "S");
       default:
         return null;
     }
@@ -101,8 +105,9 @@ public class PhaseThree implements Phase {
   }
 
   public void processEchoResultAfterUTurn(String response) {
-    if ("OUT_OF_RANGE".equals(response) &&checkEchoAfterTurn) {
+    if ("OUT_OF_RANGE".equals(response)) {
         isOutOfRange = true;
+        checkEchoAfterTurn = false;
     }
 }
   

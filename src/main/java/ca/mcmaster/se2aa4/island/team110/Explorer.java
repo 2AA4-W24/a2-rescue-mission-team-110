@@ -111,7 +111,8 @@ public class Explorer implements IExplorerRaid {
                         phaseThree.canUTurn(extras.getString("found"));
 
                         if ("OUT_OF_RANGE".equals(extras.getString("found")) && phaseThree.checkEchoAfterTurn){
-                            phaseThree.processEchoResultAfterUTurn(extras.getString("echo"));
+                            logger.info("hello");
+                            phaseThree.processEchoResultAfterUTurn(extras.getString("found"));
                         }
 
                     } 
