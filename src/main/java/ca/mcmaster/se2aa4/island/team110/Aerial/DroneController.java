@@ -1,4 +1,4 @@
-package ca.mcmaster.se2aa4.island.team110;
+package ca.mcmaster.se2aa4.island.team110.Aerial;
 
 import org.json.JSONObject;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Controller;
