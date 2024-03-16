@@ -1,4 +1,4 @@
-package ca.mcmaster.se2aa4.island.team110;
+package ca.mcmaster.se2aa4.island.team110.Aerial;
 
 public enum DroneHeading {
     NORTH("N"), 
