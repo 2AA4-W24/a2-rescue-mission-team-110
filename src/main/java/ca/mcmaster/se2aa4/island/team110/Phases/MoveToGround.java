@@ -17,7 +17,7 @@ public class MoveToGround implements Phase {
   private DroneScanner droneScanner = new DroneScanner();
   private DroneRadar droneRadar = new DroneRadar();
   private State current;
-  private int range = -2;
+  private int range = -1;
 
   private boolean hasScanGround = false;
 
@@ -40,11 +40,11 @@ public class MoveToGround implements Phase {
 
   @Override
   public String getNextDecision() {
-    if (range == -2) {
+    if (range == -1) {
       current = State.ECHO;
-    } else if (range >= 0) {
+    } else if (range > 0) {
       current = State.FLY;
-    } else if (range == -1) {
+    } else if (range == 0) {
       current = State.SCAN;
     }
 
@@ -55,10 +55,10 @@ public class MoveToGround implements Phase {
         current = State.FLY;
         return droneScanner.scan();
       case FLY:
-        if (range >= 0) {
+        if (range > 0) {
           range--;
         }
-        if (range == -1) {
+        if (range == 0) {
           current = State.SCAN;
         }
         return droneController.fly();
