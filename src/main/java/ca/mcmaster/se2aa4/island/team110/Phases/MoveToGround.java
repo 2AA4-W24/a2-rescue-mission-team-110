@@ -40,6 +40,7 @@ public class MoveToGround implements Phase {
 
   @Override
   public String getNextDecision() {
+    logger.info("Phase: MoveToGround");
     if (range == -1) {
       current = State.ECHO;
     } else if (range > 0) {
@@ -59,7 +60,7 @@ public class MoveToGround implements Phase {
           range--;
         }
         if (range == 0) {
-          current = State.SCAN;
+          hasScanGround = true;
         }
         return droneController.fly();
       default:
@@ -76,12 +77,6 @@ public class MoveToGround implements Phase {
   public void updateState(JSONObject response) {
     if (response.has("extras")) {
       JSONObject extras = response.getJSONObject("extras");
-      if (extras.has("biomes")) {
-        JSONArray biomes = extras.getJSONArray("biomes");
-        if (!(biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)))) {
-          setHasScanGround(true);
-        }
-      }
       if (extras.has("range")) {
         range = extras.getInt("range");
         logger.info("Range updated to: {}", range);
