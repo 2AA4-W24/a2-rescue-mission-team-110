@@ -42,22 +42,15 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
+        JSONObject nextAction = new JSONObject(current.getNextDecision());
 
-        if (current.reachedEnd()) {
-            current = current.getNextPhase();
-        }
-
-        String decisionAction = current.getNextDecision();
-        JSONObject actionDecision = new JSONObject(decisionAction);
-
-        if (actionDecision.getString("action").equals("echo") || actionDecision.getString("action").equals("heading")) {
-            decision.put("action", actionDecision.get("action"));
-            decision.put("parameters", actionDecision.getJSONObject("parameters"));
-        } else {
-            decision.put("action", actionDecision.get("action"));
-        }
-
+        decision.put("action", nextAction.get("action"));
         logger.info("** Decision: {}", decision.toString());
+
+        if (nextAction.has("parameters")) {
+            decision.put("parameters", nextAction.getJSONObject("parameters"));
+        }
+
         return decision.toString();
     }
 
@@ -74,7 +67,6 @@ public class Explorer implements IExplorerRaid {
 
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
-
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
         JSONObject extraInfo = response.getJSONObject("extras");
