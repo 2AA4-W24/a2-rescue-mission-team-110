@@ -50,7 +50,6 @@ public class Explorer implements IExplorerRaid {
         if (nextAction.has("parameters")) {
             decision.put("parameters", nextAction.getJSONObject("parameters"));
         }
-
         return decision.toString();
     }
 

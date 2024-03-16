@@ -6,6 +6,5 @@ public interface Phase {
   boolean reachedEnd();
   String getNextDecision();
   Phase getNextPhase();
-  boolean isFinal();
   void updateState(JSONObject response);
 }

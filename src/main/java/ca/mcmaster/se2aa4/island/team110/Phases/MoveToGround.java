@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
+import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import org.apache.logging.log4j.LogManager;
@@ -12,15 +13,16 @@ import org.apache.logging.log4j.Logger;
 public class MoveToGround implements Phase {
   private final Logger logger = LogManager.getLogger();
 
-
   private DroneController droneController = new DroneController();
   private DroneScanner droneScanner = new DroneScanner();
-  private State currentState;
+  private DroneRadar droneRadar = new DroneRadar();
+  private State current;
+  private int range = -2;
 
   private boolean hasScanGround = false;
 
   private enum State {
-    FLY, SCAN
+    FLY, SCAN, ECHO
   }
 
   public void setHasScanGround(boolean hasScanGround) {
@@ -28,7 +30,7 @@ public class MoveToGround implements Phase {
   }
 
   public MoveToGround() {
-    this.currentState = State.SCAN;
+    this.current = State.ECHO;
   }
 
   @Override
@@ -38,18 +40,31 @@ public class MoveToGround implements Phase {
 
   @Override
   public String getNextDecision() {
-    if (!hasScanGround) {
-      if (currentState == State.SCAN) {
-        currentState = State.FLY;
-        return droneScanner.scan();
-      } else {
-        currentState = State.SCAN;
-        return droneController.fly();
-      }
-
+    if (range == -2) {
+      current = State.ECHO;
+    } else if (range >= 0) {
+      current = State.FLY;
+    } else if (range == -1) {
+      current = State.SCAN;
     }
-    return null;
 
+    switch (current) {
+      case ECHO:
+        return droneRadar.echo("S");
+      case SCAN:
+        current = State.FLY;
+        return droneScanner.scan();
+      case FLY:
+        if (range >= 0) {
+          range--;
+        }
+        if (range == -1) {
+          current = State.SCAN;
+        }
+        return droneController.fly();
+      default:
+        return droneController.fly();
+    }
   }
 
   @Override
@@ -58,19 +73,18 @@ public class MoveToGround implements Phase {
   }
 
   @Override
-  public boolean isFinal() {
-    return false;
-  }
-
-  @Override
   public void updateState(JSONObject response) {
     if (response.has("extras")) {
       JSONObject extras = response.getJSONObject("extras");
       if (extras.has("biomes")) {
         JSONArray biomes = extras.getJSONArray("biomes");
-        if (!(biomes.length()== 1 && "OCEAN".equals(biomes.getString(0)))){
+        if (!(biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)))) {
           setHasScanGround(true);
         }
+      }
+      if (extras.has("range")) {
+        range = extras.getInt("range");
+        logger.info("Range updated to: {}", range);
       }
     }
   }

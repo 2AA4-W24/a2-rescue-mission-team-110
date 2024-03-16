@@ -71,11 +71,6 @@ public class FindGround implements Phase {
   }
 
   @Override
-  public boolean isFinal() {
-    return false;
-  }
-
-  @Override
   public void updateState(JSONObject response) {
     if (response.has("extras")) {
       JSONObject extras = response.getJSONObject("extras");

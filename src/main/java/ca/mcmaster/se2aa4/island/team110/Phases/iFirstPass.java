@@ -6,16 +6,19 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class iFirstPass implements Phase {
 
+  private final Logger logger = LogManager.getLogger();
   private DroneController droneController = new DroneController();
   private DroneRadar droneRadar = new DroneRadar();
   private DroneScanner droneScanner = new DroneScanner();
 
-  private State currentState = State.ECHO;
+  private State current = State.ECHO;
   private int turnStage = 0;
-  private Direction currentDirection = Direction.S;
+  private Direction currDir = Direction.S;
 
   private boolean isOutOfRange = false;
   public boolean checkEchoAfterTurn = false;
@@ -35,9 +38,9 @@ public class iFirstPass implements Phase {
 
   public void canUTurn(String response) {
     if ("OUT_OF_RANGE".equals(response)) {
-      currentState = State.U_TURN;
+      current = State.U_TURN;
     } else {
-      currentState = State.FLY;
+      current = State.FLY;
     }
   }
 
@@ -54,19 +57,19 @@ public class iFirstPass implements Phase {
         return droneController.fly();
       case 3:
         turnStage++;
-        if (currentDirection == Direction.S) {
-          currentDirection = Direction.N;
+        if (currDir == Direction.S) {
+          currDir = Direction.N;
           return droneController.turn("N");
-        } else if (currentDirection == Direction.N) {
-          currentDirection = Direction.S;
-          currentState = State.ECHO;
+        } else if (currDir == Direction.N) {
+          currDir = Direction.S;
+          current = State.ECHO;
           return droneController.turn("S");
         }
       case 4:
         turnStage = 0;
         checkEchoAfterTurn = true;
-        currentState = State.FLY;
-        return droneRadar.echo(currentDirection == Direction.N ? "N" : "S");
+        current = State.FLY;
+        return droneRadar.echo(currDir == Direction.N ? "N" : "S");
       default:
         return null;
     }
@@ -76,22 +79,22 @@ public class iFirstPass implements Phase {
   public String getNextDecision() {
     if (checkEchoAfterTurn) {
       checkEchoAfterTurn = false;
-      currentState = State.ECHO;
-      return droneRadar.echo(currentDirection == Direction.N ? "N" : "S");
+      current = State.ECHO;
+      return droneRadar.echo(currDir == Direction.N ? "N" : "S");
     } else {
-      switch (currentState) {
+      switch (current) {
         case ECHO:
-          currentState = State.FLY;
-          if (currentDirection == Direction.N) {
+          current = State.FLY;
+          if (currDir == Direction.N) {
             return droneRadar.echo("N");
           } else {
             return droneRadar.echo("S");
           }
         case FLY:
-          currentState = State.SCAN;
+          current = State.SCAN;
           return droneController.fly();
         case SCAN:
-          currentState = State.ECHO;
+          current = State.ECHO;
           return droneScanner.scan();
         case U_TURN:
           return makeUTurn();
@@ -115,19 +118,14 @@ public class iFirstPass implements Phase {
   }
 
   @Override
-  public boolean isFinal() {
-    return true;
-  }
-
-  @Override
   public void updateState(JSONObject response) {
     if (response.has("extras")) {
       JSONObject extras = response.getJSONObject("extras");
       if (extras.has("found")) {
         canUTurn(extras.getString("found"));
-        if ("OUT_OF_RANGE".equals(extras.getString("found")) && checkEchoAfterTurn){
+        if ("OUT_OF_RANGE".equals(extras.getString("found")) && checkEchoAfterTurn) {
           processEchoResultAfterUTurn(extras.getString("found"));
-      }
+        }
       }
     }
   }
