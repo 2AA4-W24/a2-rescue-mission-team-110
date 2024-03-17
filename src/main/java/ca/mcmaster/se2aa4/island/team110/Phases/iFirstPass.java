@@ -21,13 +21,14 @@ public class iFirstPass implements Phase {
   private Direction currDir = Direction.S;
 
   private boolean isOutOfRange = false;
+  public boolean checkEchoAfterTurn = false;
 
   private enum State {
     ECHO, FLY, SCAN, U_TURN
   }
 
   private enum Direction {
-    N, S, E
+    N, S
   }
 
   @Override
@@ -35,46 +36,73 @@ public class iFirstPass implements Phase {
     return isOutOfRange;
   }
 
-  private String makeUTurn() {
+  public void canUTurn(String response) {
+    if ("OUT_OF_RANGE".equals(response)) {
+      current = State.U_TURN;
+    } else {
+      current = State.FLY;
+    }
+  }
+
+  public String makeUTurn() {
     switch (turnStage) {
       case 0:
         turnStage++;
-        logger.info("turn: East");
-        current = State.U_TURN;
         return droneController.turn("E");
       case 1:
         turnStage++;
-        String directionToTurn = (currDir == Direction.S) ? "N" : "S";
-        currDir = (currDir == Direction.S) ? Direction.N : Direction.S;
-        current = State.U_TURN;
-        logger.info("Turn: {}", directionToTurn);
-        return droneController.turn(directionToTurn);
+        if (currDir == Direction.S) {
+          currDir = Direction.N;
+          return droneController.turn("N");
+        } else if (currDir == Direction.N) {
+          currDir = Direction.S;
+          current = State.ECHO;
+          return droneController.turn("S");
+        }
       case 2:
-        current = State.SCAN;
         turnStage = 0;
+        checkEchoAfterTurn = true;
+        current = State.FLY;
         return droneRadar.echo(currDir == Direction.N ? "N" : "S");
-      default:
-        return null;
-    }
+      
+    } return null;
+    
   }
 
   @Override
   public String getNextDecision() {
-    logger.info("Phase: iFirstPass");
-    switch (current) {
-      case ECHO:
-        current = State.SCAN;
-        return droneRadar.echo(currDir == Direction.N ? "N" : "S");
-      case SCAN:
-        current = State.FLY;
-        return droneScanner.scan();
-      case FLY:
-        current = State.ECHO;
-        return droneController.fly();
-      case U_TURN:
-        return makeUTurn();
-      default:
-        return null;
+    if (checkEchoAfterTurn) {
+      checkEchoAfterTurn = false;
+      current = State.ECHO;
+      return droneRadar.echo(currDir == Direction.N ? "N" : "S");
+    } else {
+      switch (current) {
+        case ECHO:
+          current = State.FLY;
+          if (currDir == Direction.N) {
+            return droneRadar.echo("N");
+          } else {
+            return droneRadar.echo("S");
+          }
+        case FLY:
+          current = State.SCAN;
+          return droneController.fly();
+        case SCAN:
+          current = State.ECHO;
+          return droneScanner.scan();
+        case U_TURN:
+          return makeUTurn();
+        default:
+          return null;
+      }
+    }
+
+  }
+
+  public void processEchoResultAfterUTurn(String response) {
+    if ("OUT_OF_RANGE".equals(response)) {
+      isOutOfRange = true;
+      checkEchoAfterTurn = false;
     }
   }
 
@@ -83,19 +111,16 @@ public class iFirstPass implements Phase {
     return null;
   }
 
+  
+
   @Override
   public void updateState(JSONObject response) {
     if (response.has("extras")) {
       JSONObject extras = response.getJSONObject("extras");
       if (extras.has("found")) {
-        if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
-          if(extras.has("range")){
-            int range = extras.getInt("range");
-            if(range < 10){
-              current = State.U_TURN;
-            }
-            isOutOfRange = true;
-          }
+        canUTurn(extras.getString("found"));
+        if ("OUT_OF_RANGE".equals(extras.getString("found")) && checkEchoAfterTurn) {
+          processEchoResultAfterUTurn(extras.getString("found"));
         }
       }
     }
