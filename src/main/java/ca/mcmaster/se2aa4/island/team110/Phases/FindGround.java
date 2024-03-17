@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 
 public class FindGround implements Phase {
   private final Logger logger = LogManager.getLogger();
@@ -18,11 +19,14 @@ public class FindGround implements Phase {
   private DroneController droneController = new DroneController();
   private DroneRadar droneRadar = new DroneRadar();
   private State current;
+  private RelativeMap map;
 
   private boolean groundDetected = false;
   private boolean turnCompleted = false;
 
-  public FindGround() {
+
+  public FindGround(RelativeMap map) {
+    this.map = map;
     this.current = State.FIND_GROUND;
   }
 

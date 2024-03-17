@@ -22,9 +22,7 @@ public class Explorer implements IExplorerRaid {
     private RelativeMap relativeMap;
     private Phase current;
 
-    public Explorer() {
-        this.current = new FindGround();
-    }
+    
 
     @Override
     public void initialize(String s) {
@@ -34,6 +32,7 @@ public class Explorer implements IExplorerRaid {
         String direction = info.getString("heading");
         droneHeading = DroneHeading.getHeading(direction);
         relativeMap = new RelativeMap(droneHeading);
+        this.current = new FindGround(relativeMap);
 
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);

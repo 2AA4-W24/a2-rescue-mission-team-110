@@ -3,6 +3,7 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
@@ -16,10 +17,17 @@ public class MoveToGround implements Phase {
   private DroneController droneController = new DroneController();
   private DroneScanner droneScanner = new DroneScanner();
   private DroneRadar droneRadar = new DroneRadar();
+
+  private RelativeMap map;
+
   private State current;
   private int range = -1;
 
   private boolean hasScanGround = false;
+
+  public MoveToGround(RelativeMap map) {
+    this.map = map;
+  }
 
   private enum State {
     FLY, SCAN, ECHO
@@ -70,7 +78,7 @@ public class MoveToGround implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return new iFirstPass();
+    return new iFirstPass(map);
   }
 
   @Override

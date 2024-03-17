@@ -3,6 +3,7 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
@@ -17,6 +18,8 @@ public class iFirstPass implements Phase {
   private DroneRadar droneRadar = new DroneRadar();
   private DroneScanner droneScanner = new DroneScanner();
 
+  private RelativeMap map;
+
   private State current = State.SCAN;
   private int turnStage = 0;
   private Direction currDir = Direction.S;
@@ -25,6 +28,10 @@ public class iFirstPass implements Phase {
   private boolean hasUturned = false;
   private boolean waitingForEcho = false;
   private int groundDis = -2;
+
+  public iFirstPass(RelativeMap map) {
+    this.map = map;
+  }
 
   private enum State {
     ECHO, FLY, SCAN, U_TURN, ECHO2, FLY2
