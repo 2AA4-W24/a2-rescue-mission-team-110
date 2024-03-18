@@ -36,10 +36,14 @@ public class iFirstPass implements Phase {
   private String directionToTurn = "";
   private String mapDirUpdate = "";
   
+  private String echohere;
 
   public iFirstPass(RelativeMap map, DroneHeading direction) {
     this.map = map;
     this.currDir = direction;
+    
+    
+
     
   }
 
@@ -54,6 +58,15 @@ public class iFirstPass implements Phase {
   @Override
   public boolean reachedEnd() {
     return isOutOfRange;
+  }
+
+  public void determineEcho() {
+    if (currDir == DroneHeading.NORTH || currDir == DroneHeading.SOUTH){
+      this.echohere = currDir == DroneHeading.NORTH ? "N" : "S";
+    } 
+    else if (currDir == DroneHeading.EAST || currDir == DroneHeading.WEST){
+      this.echohere = currDir == DroneHeading.EAST ? "E" : "W";
+    }
   }
 
   private String makeUTurn() {
@@ -85,6 +98,14 @@ public class iFirstPass implements Phase {
           this.directionToTurn = "S";
           this.mapDirUpdate = "RIGHT";
         }
+        else if (this.previousDir == DroneHeading.EAST) {
+          this.directionToTurn = "W";
+          this.mapDirUpdate = "LEFT";
+        }
+        else if (this.previousDir == DroneHeading.WEST) {
+          this.directionToTurn = "E";
+          this.mapDirUpdate = "RIGHT";
+        }
 
         this.currDir = this.currDir.turn(this.mapDirUpdate);
         logger.info("Turn: {}", directionToTurn);
@@ -94,7 +115,8 @@ public class iFirstPass implements Phase {
         current = State.SCAN;
         turnStage = 0;
         hasUturned = true;
-        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
+        determineEcho();
+        return droneRadar.echo(this.echohere);
       default:
         return null;
     }
@@ -112,7 +134,8 @@ public class iFirstPass implements Phase {
     switch (current) {
       case ECHO:
         current = State.SCAN;
-        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
+        determineEcho();
+        return droneRadar.echo(this.echohere);
       case SCAN:
         current = State.FLY;
         hasUturned = false;
@@ -123,7 +146,8 @@ public class iFirstPass implements Phase {
       case U_TURN:
         return makeUTurn();
       case ECHO2:
-        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
+        determineEcho();
+        return droneRadar.echo(this.echohere);
       case FLY2:
         if (groundDis == -1) {
           current = State.SCAN;

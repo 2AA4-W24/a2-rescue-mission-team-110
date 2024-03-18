@@ -6,9 +6,14 @@ public enum DroneHeading {
     EAST("E"), 
     WEST("W");
 
+    private final String direction;
    
     private DroneHeading(String direction) {
+      this.direction = direction;
+    }
 
+    public String getDirection() {
+      return direction;
     }
 
     public static DroneHeading getHeading(String direction) {

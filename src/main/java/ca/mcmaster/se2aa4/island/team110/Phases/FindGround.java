@@ -24,6 +24,7 @@ public class FindGround implements Phase {
 
   private RelativeMap map;
   private DroneHeading currDir;
+  private String lastEchoDirection = null;
 
   private boolean groundDetected = false;
   private boolean turnCompleted = false;
@@ -39,6 +40,28 @@ public class FindGround implements Phase {
     this.current = State.FLY;
   }
 
+  private String getAndAlternateEchoDirection() {
+    String[] echoDirections;
+    if ("N".equals(currDir) || "S".equals(currDir)) {
+        echoDirections = new String[]{"E", "W"};
+    } 
+    else { 
+        echoDirections= new String[]{"N","S"};
+    }
+
+    
+    if (lastEchoDirection == null || !lastEchoDirection.equals(echoDirections[0])) {
+        lastEchoDirection = echoDirections[0];
+    } 
+    else {
+        lastEchoDirection= echoDirections[1];
+    }
+
+    return lastEchoDirection;
+  }
+
+
+
   @Override
   public boolean reachedEnd() {
     return turnCompleted;
@@ -49,17 +72,17 @@ public class FindGround implements Phase {
     logger.info("Phase: FindGround");
     switch (current) {
       case FIND_GROUND:
-        // Echo south, change state
+        String nextEchoDirection = getAndAlternateEchoDirection();
         current = State.FLY;
-        return droneRadar.echo("S");
+        return droneRadar.echo(nextEchoDirection);
       case GO_TO_GROUND:
-        // Turn south, mark turn completed
+        
         current = State.FLY;
         turnCompleted = true;
-        this.currDir = this.currDir.turn("RIGHT");
-        return droneController.turn("S");
+        this.currDir = this.currDir.turn("RIGHT");// relative map
+        return droneController.turn(lastEchoDirection);
       case FLY:
-        // Fly, then go back to finding ground state
+        
         current = State.FIND_GROUND;
         return droneController.fly();
       default:
