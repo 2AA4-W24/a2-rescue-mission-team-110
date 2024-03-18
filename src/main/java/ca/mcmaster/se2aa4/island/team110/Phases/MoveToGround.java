@@ -24,6 +24,7 @@ public class MoveToGround implements Phase {
   private int range = -1;
 
   private boolean hasScanGround = false;
+  private String direction;
 
   public MoveToGround(RelativeMap map) {
     this.map = map;
@@ -39,6 +40,10 @@ public class MoveToGround implements Phase {
 
   public MoveToGround() {
     this.current = State.ECHO;
+  }
+
+  public void setDirection(String direction) {
+    this.direction = direction;
   }
 
   @Override
@@ -59,7 +64,7 @@ public class MoveToGround implements Phase {
 
     switch (current) {
       case ECHO:
-        return droneRadar.echo("S");
+        return droneRadar.echo(direction);
       case SCAN:
         current = State.FLY;
         return droneScanner.scan();
@@ -78,7 +83,9 @@ public class MoveToGround implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return new iFirstPass(map);
+    iFirstPass nextPhase = new iFirstPass(map);
+    nextPhase.setDirection(direction); 
+    return nextPhase;
   }
 
   @Override

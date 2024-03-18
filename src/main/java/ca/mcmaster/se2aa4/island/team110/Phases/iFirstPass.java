@@ -22,12 +22,32 @@ public class iFirstPass implements Phase {
 
   private State current = State.SCAN;
   private int turnStage = 0;
-  private Direction currDir = Direction.S;
+  private String turnDirr;
+  private Direction currDir;
 
   private boolean isOutOfRange = false;
   private boolean hasUturned = false;
   private boolean waitingForEcho = false;
   private int groundDis = -2;
+  private String incomingDirection;
+
+  public void setDirection(String direction) {
+    this.incomingDirection = direction; // N/S or E/W
+    this.currDir = Direction.valueOf(incomingDirection);
+    determineTurnDirection();
+  }
+
+  private void determineTurnDirection() {
+    if ("N".equals(incomingDirection) || "S".equals(incomingDirection)) {
+        this.turnDirr = "E";
+    } else if ("E".equals(incomingDirection) || "W".equals(incomingDirection)) {
+        this.turnDirr = "S";
+    }
+    
+  }
+
+  
+
 
   public iFirstPass(RelativeMap map) {
     this.map = map;
@@ -38,7 +58,7 @@ public class iFirstPass implements Phase {
   }
 
   private enum Direction {
-    N, S, E
+    N, S, E, W
   }
 
   @Override
@@ -50,8 +70,7 @@ public class iFirstPass implements Phase {
     switch (turnStage) {
       case 0:
         turnStage++;
-        logger.info("turn: East");
-        return droneController.turn("E");
+        return droneController.turn(turnDirr);
       case 1:
         turnStage++;
         String directionToTurn = (currDir == Direction.S) ? "N" : "S";

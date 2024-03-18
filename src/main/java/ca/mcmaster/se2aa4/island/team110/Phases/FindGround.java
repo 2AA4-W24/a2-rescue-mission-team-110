@@ -13,7 +13,7 @@ public class FindGround implements Phase {
   private final Logger logger = LogManager.getLogger();
 
   private enum State {
-    FIND_GROUND, GO_TO_GROUND, FLY
+    FIND_GROUND_S, FIND_GROUND_N, FIND_GROUND_E, FIND_GROUND_W, GO_TO_GROUND, FLY
   }
 
   private DroneController droneController = new DroneController();
@@ -23,11 +23,12 @@ public class FindGround implements Phase {
 
   private boolean groundDetected = false;
   private boolean turnCompleted = false;
+  private String compass;
 
 
   public FindGround(RelativeMap map) {
     this.map = map;
-    this.current = State.FIND_GROUND;
+    this.current = State.FIND_GROUND_S;
   }
 
   public void setToFly() {
@@ -43,19 +44,36 @@ public class FindGround implements Phase {
   public String getNextDecision() {
     logger.info("Phase: FindGround");
     switch (current) {
-      case FIND_GROUND:
-        // Echo south, change state
+      case FIND_GROUND_S: // Echo south, change state
+        compass = "S";
+        current = State.FIND_GROUND_N;
+        return droneRadar.echo(compass);
+
+      case FIND_GROUND_N: // Echo North change state
+        compass = "N";  
+        current = State.FIND_GROUND_E;
+        return droneRadar.echo(compass);
+
+      case FIND_GROUND_E: // Echo east change state
+        compass = "E";
+        current = State.FIND_GROUND_W;
+        return droneRadar.echo(compass);
+
+      case FIND_GROUND_W: //Echo West, change state
+        compass = "S";
         current = State.FLY;
-        return droneRadar.echo("S");
-      case GO_TO_GROUND:
-        // Turn south, mark turn completed
+        return droneRadar.echo(compass);
+
+      case GO_TO_GROUND: // Turn to direction of ground, mark turn completed
+        
         current = State.FLY;
         turnCompleted = true;
-        return droneController.turn("S");
-      case FLY:
-        // Fly, then go back to finding ground state
-        current = State.FIND_GROUND;
+        return droneController.turn(compass);
+
+      case FLY:     // Fly, then go back to finding ground state
+        current = State.FIND_GROUND_S;
         return droneController.fly();
+
       default:
         return droneController.fly();
     }
@@ -72,7 +90,9 @@ public class FindGround implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return new MoveToGround();
+    MoveToGround moveToGround= new MoveToGround(map);
+    moveToGround.setDirection(compass); 
+    return moveToGround;
   }
 
   @Override
