@@ -168,6 +168,8 @@ public class iSecondPass implements Phase {
     }
 
     public String getNextDecision() {
+        logger.info("Phase: iFirstPass");
+        
         if (current == State.FLY2 && groundDis >= 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
