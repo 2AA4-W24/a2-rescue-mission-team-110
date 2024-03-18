@@ -156,7 +156,7 @@ public class iFirstPass implements Phase {
       }
       if (extras.has("biomes")) {
         JSONArray biomes = extras.getJSONArray("biomes");
-        if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
+        if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0))) {
           waitingForEcho = true;
           current = State.ECHO2;
         }
