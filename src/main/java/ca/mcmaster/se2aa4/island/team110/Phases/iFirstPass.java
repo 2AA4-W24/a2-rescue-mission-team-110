@@ -113,7 +113,7 @@ public class iFirstPass implements Phase {
       case ECHO:
         current = State.SCAN;
         return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
-      case SCAN:
+      case SCAN:  
         current = State.FLY;
         hasUturned = false;
         return droneScanner.scan();
@@ -137,7 +137,7 @@ public class iFirstPass implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return null;
+    return new iSecondPass(this.map, this.currDir);
   }
 
   @Override
