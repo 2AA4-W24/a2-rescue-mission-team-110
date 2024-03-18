@@ -22,17 +22,17 @@ public class Explorer implements IExplorerRaid {
     private RelativeMap relativeMap;
     private Phase current;
 
-    
-
     @Override
     public void initialize(String s) {
         logger.info("** Initializing the Exploration Command Center");
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Initialization info:\n {}", info.toString(2));
         String direction = info.getString("heading");
+
         droneHeading = DroneHeading.getHeading(direction);
-        relativeMap = new RelativeMap(droneHeading);
-        this.current = new FindGround(relativeMap);
+        relativeMap = new RelativeMap();
+
+        this.current = new FindGround(relativeMap, droneHeading);
 
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
@@ -58,10 +58,10 @@ public class Explorer implements IExplorerRaid {
         JSONObject response = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Response received:\n" + response.toString(2));
 
-        current.updateState(response);
+        this.current.updateState(response);
 
-        if (current.reachedEnd()) {
-            current = current.getNextPhase();
+        if (this.current.reachedEnd()) {
+            this.current = this.current.getNextPhase();
         }
 
         Integer cost = response.getInt("cost");

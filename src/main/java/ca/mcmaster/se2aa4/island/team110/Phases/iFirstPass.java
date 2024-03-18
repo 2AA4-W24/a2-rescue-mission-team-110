@@ -7,7 +7,10 @@ import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
+import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,29 +20,36 @@ public class iFirstPass implements Phase {
   private DroneController droneController = new DroneController();
   private DroneRadar droneRadar = new DroneRadar();
   private DroneScanner droneScanner = new DroneScanner();
+  private DroneHeading currDir;
+  private DroneHeading previousDir;
 
   private RelativeMap map;
 
   private State current = State.SCAN;
   private int turnStage = 0;
-  private Direction currDir = Direction.S;
+ 
 
   private boolean isOutOfRange = false;
   private boolean hasUturned = false;
   private boolean waitingForEcho = false;
   private int groundDis = -2;
+  private String directionToTurn = "";
+  private String mapDirUpdate = "";
+  
 
-  public iFirstPass(RelativeMap map) {
+  public iFirstPass(RelativeMap map, DroneHeading direction) {
     this.map = map;
+    this.currDir = direction;
+    
   }
 
   private enum State {
     ECHO, FLY, SCAN, U_TURN, ECHO2, FLY2
   }
 
-  private enum Direction {
-    N, S, E
-  }
+  // private enum Direction {
+  //   N, S, E
+  // }
 
   @Override
   public boolean reachedEnd() {
@@ -50,19 +60,41 @@ public class iFirstPass implements Phase {
     switch (turnStage) {
       case 0:
         turnStage++;
-        logger.info("turn: East");
-        return droneController.turn("E");
+        if (this.currDir == DroneHeading.SOUTH) {
+          this.directionToTurn = "E";
+          this.mapDirUpdate = "LEFT";
+        }
+        else if (this.currDir == DroneHeading.NORTH) {
+          this.directionToTurn = "E";
+          this.mapDirUpdate = "RIGHT";
+        }
+       
+        this.previousDir = this.currDir;
+        this.currDir = this.currDir.turn(this.mapDirUpdate);
+        return droneController.turn(directionToTurn);
+
       case 1:
         turnStage++;
-        String directionToTurn = (currDir == Direction.S) ? "N" : "S";
-        currDir = (currDir == Direction.S) ? Direction.N : Direction.S;
+        if (this.previousDir == DroneHeading.SOUTH) {
+          
+          this.directionToTurn = "N";
+          this.mapDirUpdate = "LEFT";
+         
+        }
+        else if (this.previousDir == DroneHeading.NORTH) {
+          this.directionToTurn = "S";
+          this.mapDirUpdate = "RIGHT";
+        }
+
+        this.currDir = this.currDir.turn(this.mapDirUpdate);
         logger.info("Turn: {}", directionToTurn);
+
         return droneController.turn(directionToTurn);
       case 2:
         current = State.SCAN;
         turnStage = 0;
         hasUturned = true;
-        return droneRadar.echo(currDir == Direction.N ? "N" : "S");
+        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
       default:
         return null;
     }
@@ -80,7 +112,7 @@ public class iFirstPass implements Phase {
     switch (current) {
       case ECHO:
         current = State.SCAN;
-        return droneRadar.echo(currDir == Direction.N ? "N" : "S");
+        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
       case SCAN:
         current = State.FLY;
         hasUturned = false;
@@ -91,7 +123,7 @@ public class iFirstPass implements Phase {
       case U_TURN:
         return makeUTurn();
       case ECHO2:
-        return droneRadar.echo(currDir == Direction.N ? "N" : "S");
+        return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
       case FLY2:
         if (groundDis == -1) {
           current = State.SCAN;

@@ -7,6 +7,9 @@ import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
+import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+
+
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,14 +22,17 @@ public class MoveToGround implements Phase {
   private DroneRadar droneRadar = new DroneRadar();
 
   private RelativeMap map;
+  private DroneHeading currDir;
 
   private State current;
   private int range = -1;
 
   private boolean hasScanGround = false;
 
-  public MoveToGround(RelativeMap map) {
+  public MoveToGround(RelativeMap map, DroneHeading direction) {
+    this.current = State.ECHO;
     this.map = map;
+    this.currDir= direction;
   }
 
   private enum State {
@@ -37,9 +43,6 @@ public class MoveToGround implements Phase {
     this.hasScanGround = hasScanGround;
   }
 
-  public MoveToGround() {
-    this.current = State.ECHO;
-  }
 
   @Override
   public boolean reachedEnd() {
@@ -78,7 +81,7 @@ public class MoveToGround implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return new iFirstPass(map);
+    return new iFirstPass(map, currDir);
   }
 
   @Override
