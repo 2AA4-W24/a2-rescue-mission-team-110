@@ -176,8 +176,7 @@ public class iSecondPass implements Phase {
                 current = State.SCAN;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
-                determineEcho();
-                return droneRadar.echo(this.echohere);
+                
             case SCAN:
                 current = State.FLY;
                 hasUturned = false;
@@ -193,8 +192,7 @@ public class iSecondPass implements Phase {
             case ECHO2:
                 determineEcho();
                 return droneRadar.echo(this.echohere);
-                determineEcho();
-                return droneRadar.echo(this.echohere);
+               
             case FLY2:
                 if (groundDis == -1) {
                     current = State.SCAN;
