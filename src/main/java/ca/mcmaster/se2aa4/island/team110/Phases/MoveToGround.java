@@ -26,6 +26,7 @@ public class MoveToGround implements Phase {
 
   private State current;
   private int range = -1;
+  
 
   private boolean hasScanGround = false;
 
@@ -62,7 +63,7 @@ public class MoveToGround implements Phase {
 
     switch (current) {
       case ECHO:
-        return droneRadar.echo("S");
+        return droneRadar.echo(currDir.getDirection());
       case SCAN:
         current = State.FLY;
         return droneScanner.scan();
