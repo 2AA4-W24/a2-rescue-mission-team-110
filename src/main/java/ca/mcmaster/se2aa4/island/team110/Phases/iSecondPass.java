@@ -22,7 +22,7 @@ public class iSecondPass implements Phase {
     private DroneScanner droneScanner = new DroneScanner();
     private DroneHeading currDir;
     private DroneHeading previousDir;
-    private DroneHeading firstDir;
+    private DroneHeading initDir;
 
     private RelativeMap map;
 
@@ -57,43 +57,33 @@ public class iSecondPass implements Phase {
                 initTurnStage++;
                 if (this.currDir == DroneHeading.NORTH) {
                     this.directionToTurn = "E";
-                    this.mapDirUpdate = "RIGHT";
-                }
-                else if (this.currDir == DroneHeading.SOUTH) {
+                } else if (this.currDir == DroneHeading.SOUTH) {
                     this.directionToTurn = "E";
-                    this.mapDirUpdate = "LEFT";
                 }
-
-                logger.info("lol");
-                this.firstDir = this.currDir;
+                this.mapDirUpdate = "RIGHT";
+                this.initDir = this.currDir;
                 this.currDir = this.currDir.turn(this.mapDirUpdate);
                 return droneController.turn(directionToTurn);
 
             case 1:
                 initTurnStage++;
-                if (this.firstDir == DroneHeading.NORTH) {
-                    this.directionToTurn = "N";
-                    this.mapDirUpdate = "LEFT";
-                }
-                else if (this.currDir == DroneHeading.SOUTH) {
+                if (this.initDir == DroneHeading.NORTH) {
                     this.directionToTurn = "S";
-                    this.mapDirUpdate = "RIGHT";
+                } else if (this.initDir == DroneHeading.SOUTH) {
+                    this.directionToTurn = "N";
                 }
-
+                this.mapDirUpdate = "RIGHT";
                 this.currDir = this.currDir.turn(this.mapDirUpdate);
                 return droneController.turn(directionToTurn);
 
             case 2:
                 initTurnStage++;
-                if (this.firstDir == DroneHeading.NORTH) {
+                if (this.initDir == DroneHeading.NORTH) {
                     this.directionToTurn = "W";
-                    this.mapDirUpdate = "LEFT";
+                } else if (this.initDir == DroneHeading.SOUTH) {
+                    this.directionToTurn = "E";
                 }
-                else if (this.currDir == DroneHeading.SOUTH) {
-                    this.directionToTurn = "W";
-                    this.mapDirUpdate = "RIGHT";
-                }
-                
+                this.mapDirUpdate = "RIGHT";
                 this.currDir = this.currDir.turn(this.mapDirUpdate);
                 return droneController.turn(directionToTurn);
 
@@ -102,79 +92,71 @@ public class iSecondPass implements Phase {
                 return droneController.fly();
 
             case 4:
+                initTurnStage = 0;
+                if (this.initDir == DroneHeading.NORTH) {
+                    this.directionToTurn = "N";
+                } else if (this.initDir == DroneHeading.SOUTH) {
+                    this.directionToTurn = "S";
+                }
+                this.mapDirUpdate = "RIGHT";
                 current = State.SCAN;
                 hasUturned = true;
-                initTurnStage++;
-                if (this.firstDir == DroneHeading.NORTH) {
-                    this.directionToTurn = "S";
-                    this.mapDirUpdate = "LEFT";
-                }
-                else if (this.currDir == DroneHeading.SOUTH) {
-                    this.directionToTurn = "N";
-                    this.mapDirUpdate = "RIGHT";
-                }
-
                 this.currDir = this.currDir.turn(this.mapDirUpdate);
                 return droneController.turn(directionToTurn);
             default:
                 return null;
         }
-
-
     }
 
     private String makeUTurn() {
         switch (turnStage) {
             case 0:
-              turnStage++;
-              if (this.currDir == DroneHeading.SOUTH) {
-                this.directionToTurn = "W";
-                this.mapDirUpdate = "RIGHT";
-              }
-              else if (this.currDir == DroneHeading.NORTH) {
-                this.directionToTurn = "W";
-                this.mapDirUpdate = "LEFT";
-              }
-             
-              this.previousDir = this.currDir;
-              this.currDir = this.currDir.turn(this.mapDirUpdate);
-              return droneController.turn(directionToTurn);
-      
+                turnStage++;
+                if (this.currDir == DroneHeading.SOUTH) {
+                    this.directionToTurn = "W";
+                    this.mapDirUpdate = "RIGHT";
+                } else if (this.currDir == DroneHeading.NORTH) {
+                    this.directionToTurn = "W";
+                    this.mapDirUpdate = "LEFT";
+                }
+
+                this.initDir = this.currDir;
+                this.currDir = this.currDir.turn(this.mapDirUpdate);
+                return droneController.turn(directionToTurn);
+
             case 1:
-              turnStage++;
-              if (this.previousDir == DroneHeading.SOUTH) {
-                
-                this.directionToTurn = "N";
-                this.mapDirUpdate = "RIGHT";
-               
-              }
-              else if (this.previousDir == DroneHeading.NORTH) {
-                this.directionToTurn = "S";
-                this.mapDirUpdate = "LEFT";
-              }
-      
-              this.currDir = this.currDir.turn(this.mapDirUpdate);
-              logger.info("Turn: {}", directionToTurn);
-      
-              return droneController.turn(directionToTurn);
+                turnStage++;
+                if (this.initDir == DroneHeading.SOUTH) {
+                    this.directionToTurn = "N";
+                    this.mapDirUpdate = "RIGHT";
+
+                } else if (this.initDir == DroneHeading.NORTH) {
+                    this.directionToTurn = "S";
+                    this.mapDirUpdate = "LEFT";
+                }
+
+                this.currDir = this.currDir.turn(this.mapDirUpdate);
+                logger.info("Turn: {}", directionToTurn);
+
+                return droneController.turn(directionToTurn);
             case 2:
-              current = State.SCAN;
-              turnStage = 0;
-              hasUturned = true;
-              return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
+                current = State.SCAN;
+                turnStage = 0;
+                hasUturned = true;
+                return droneRadar.echo(currDir == DroneHeading.NORTH ? "N" : "S");
             default:
-              return null;
-          }
+                return null;
+        }
     }
 
     public String getNextDecision() {
-        logger.info("Phase: iFirstPass");
-        
+        logger.info("Phase: iSecondPass");
+
         if (current == State.FLY2 && groundDis >= 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
-      
+
         switch (current) {
             case ECHO:
                 current = State.SCAN;
@@ -203,39 +185,38 @@ public class iSecondPass implements Phase {
         }
 
     }
-    public Phase getNextPhase() {
-        logger.info("Hi i'm in second pass");
-        return null;
 
+    public Phase getNextPhase() {
+        logger.info("Second pass ended");
+        return null;
     }
+
     public void updateState(JSONObject response) {
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras.has("found")) {
-              if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
-                if (hasUturned) {
-                  logger.info("hasUturned is True");
-                  isOutOfRange = true;
-                } else {
-                  current = State.U_TURN;
+                if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
+                    if (hasUturned) {
+                        logger.info("hasUturned is True");
+                        isOutOfRange = true;
+                    } else {
+                        current = State.U_TURN;
+                    }
                 }
-              }
             }
             if (extras.has("biomes")) {
-              JSONArray biomes = extras.getJSONArray("biomes");
-              if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
-                waitingForEcho = true;
-                current = State.ECHO2;
-              }
+                JSONArray biomes = extras.getJSONArray("biomes");
+                if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
+                    waitingForEcho = true;
+                    current = State.ECHO2;
+                }
             }
             if (waitingForEcho && extras.has("range")) {
-              groundDis = extras.getInt("range");
-              logger.info("Ground distance updated to: {}", groundDis);
-              waitingForEcho = false;
-              current = State.FLY2;
+                groundDis = extras.getInt("range");
+                logger.info("Ground distance updated to: {}", groundDis);
+                waitingForEcho = false;
+                current = State.FLY2;
             }
-          }
-
+        }
     }
-
 }
