@@ -38,6 +38,10 @@ public class RelativeMap {
         
     }
 
+    public void updatePosTurn(DroneHeading heading, String direction) {
+        
+    }
+
     public void addTile(int x, int y, TileType tileType){
         Point newTile = new Point(x, y);
         relative_map.put(newTile, tileType);

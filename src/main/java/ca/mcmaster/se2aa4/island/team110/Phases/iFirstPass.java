@@ -42,9 +42,6 @@ public class iFirstPass implements Phase {
     this.map = map;
     this.currDir = direction;
     
-    
-
-    
   }
 
   private enum State {
