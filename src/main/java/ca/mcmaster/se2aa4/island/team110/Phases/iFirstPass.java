@@ -158,7 +158,7 @@ public class iFirstPass implements Phase {
 
   @Override
   public Phase getNextPhase() {
-    return null;
+    return new iSecondPass(this.map, this.currDir);
   }
 
   @Override
