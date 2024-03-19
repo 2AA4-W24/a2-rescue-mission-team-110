@@ -54,10 +54,10 @@ public class iSecondPass implements Phase {
 
     public void determineEcho() {
         if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH){
-          this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
+            this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
         } 
         else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST){
-          this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
+            this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
         }
     }
 
