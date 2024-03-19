@@ -16,102 +16,102 @@ import org.apache.logging.log4j.Logger;
 
 public class iFirstPass implements Phase {
 
-    private final Logger logger = LogManager.getLogger();
-    private DroneController droneController = new DroneController();
-    private DroneRadar droneRadar = new DroneRadar();
-    private DroneScanner droneScanner = new DroneScanner();
+  private final Logger logger = LogManager.getLogger();
+  private DroneController droneController = new DroneController();
+  private DroneRadar droneRadar = new DroneRadar();
+  private DroneScanner droneScanner = new DroneScanner();
 
-    private DroneHeading previous_direction;
+  private DroneHeading previous_direction;
 
-    private RelativeMap map;
+  private RelativeMap map;
 
-    private State current_state = State.SCAN;
-    private int turnStage = 0;
-
-
-    private boolean isOutOfRange = false;
-    private boolean hasUturned = false;
-    private boolean waitingForEcho = false;
-    private int groundDis = -2;
-    private String directionToTurn = "";
+  private State current_state = State.SCAN;
+  private int turnStage = 0;
 
 
-    private String echohere;
+  private boolean isOutOfRange = false;
+  private boolean hasUturned = false;
+  private boolean waitingForEcho = false;
+  private int groundDis = -2;
+  private String directionToTurn = "";
 
-    public iFirstPass(RelativeMap map) {
-        this.map = map;
-    }
 
-    private enum State {
-        ECHO, FLY, SCAN, U_TURN, ECHO2, FLY2
-    }
+  private String echohere;
 
-    // private enum Direction {
-    //   N, S, E
-    // }
+  public iFirstPass(RelativeMap map) {
+      this.map = map;
+  }
 
-    @Override
-    public boolean reachedEnd() {
-        return isOutOfRange;
-    }
+  private enum State {
+      ECHO, FLY, SCAN, U_TURN, ECHO2, FLY2
+  }
 
-    public void determineEcho() {
-        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH){
-            this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
-        } 
-        else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST){
-            this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
-        }
-    }
+  // private enum Direction {
+  //   N, S, E
+  // }
 
-    private String makeUTurn() { //Only works for one case (Starting position is top left)
-        switch (turnStage) {
-            case 0: //check the current heading and determine which direction to turn for the U-turn
-                turnStage++;
-                this.previous_direction = map.getCurrentHeading();
+  @Override
+  public boolean reachedEnd() {
+      return isOutOfRange;
+  }
 
-            if (map.getCurrentHeading() == DroneHeading.SOUTH) { 
-                this.directionToTurn = "E";
-                map.updatePosTurn("LEFT");
-            }
-            else if (map.getCurrentHeading() == DroneHeading.NORTH) {
-                this.directionToTurn = "E";
-                map.updatePosTurn("RIGHT");
-            }
-          
-              return droneController.turn(directionToTurn);
+  public void determineEcho() {
+      if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH){
+          this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
+      } 
+      else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST){
+          this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
+      }
+  }
 
-      case 1: //second stage of the u-turn, we should be in the middle of the u-turn right now
-        turnStage++;
-        if (this.previous_direction == DroneHeading.SOUTH) {
-          this.directionToTurn = "N";
-          map.updatePosTurn("LEFT");
-         
-        }
-        else if (this.previous_direction == DroneHeading.NORTH) {
-          this.directionToTurn = "S";
-          map.updatePosTurn("RIGHT");
-        }
-        // else if (this.previous_direction == DroneHeading.EAST) {
-        //   this.directionToTurn = "W";
-        //   map.updatePosTurn("LEFT");
-        // }
-        // else if (this.previous_direction == DroneHeading.WEST) {
-        //   this.directionToTurn = "E";
-        //   map.updatePosTurn("RIGHT");
-        // }
+  private String makeUTurn() { //Only works for one case (Starting position is top left)
+      switch (turnStage) {
+          case 0: //check the current heading and determine which direction to turn for the U-turn
+              turnStage++;
+              this.previous_direction = map.getCurrentHeading();
 
-        logger.info("Turn: {}", directionToTurn);
+          if (map.getCurrentHeading() == DroneHeading.SOUTH) { 
+              this.directionToTurn = "E";
+              map.updatePosTurn("LEFT");
+          }
+          else if (map.getCurrentHeading() == DroneHeading.NORTH) {
+              this.directionToTurn = "E";
+              map.updatePosTurn("RIGHT");
+          }
+        
+            return droneController.turn(directionToTurn);
 
-        return droneController.turn(directionToTurn);
-      case 2: // state to determine if we are at the end of the u-turn to get if we are at the end of scanning
-        current_state = State.SCAN;
-        turnStage = 0;
-        hasUturned = true;
-        determineEcho();
-        return droneRadar.echo(this.echohere);
-      default:
-        return null;
+    case 1: //second stage of the u-turn, we should be in the middle of the u-turn right now
+      turnStage++;
+      if (this.previous_direction == DroneHeading.SOUTH) {
+        this.directionToTurn = "N";
+        map.updatePosTurn("LEFT");
+        
+      }
+      else if (this.previous_direction == DroneHeading.NORTH) {
+        this.directionToTurn = "S";
+        map.updatePosTurn("RIGHT");
+      }
+      // else if (this.previous_direction == DroneHeading.EAST) {
+      //   this.directionToTurn = "W";
+      //   map.updatePosTurn("LEFT");
+      // }
+      // else if (this.previous_direction == DroneHeading.WEST) {
+      //   this.directionToTurn = "E";
+      //   map.updatePosTurn("RIGHT");
+      // }
+
+      logger.info("Turn: {}", directionToTurn);
+
+      return droneController.turn(directionToTurn);
+    case 2: // state to determine if we are at the end of the u-turn to get if we are at the end of scanning
+      current_state = State.SCAN;
+      turnStage = 0;
+      hasUturned = true;
+      determineEcho();
+      return droneRadar.echo(this.echohere);
+    default:
+      return null;
     }
   }
 
