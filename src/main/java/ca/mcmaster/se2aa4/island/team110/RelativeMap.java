@@ -15,17 +15,19 @@ public class RelativeMap {
     private final Logger logger = LogManager.getLogger();
     private Map<Point, TileType> relative_map;
     Point current_position;
+    DroneHeading current_heading;
 
     
-    public RelativeMap () {
+    public RelativeMap (DroneHeading initial_heading) {
         relative_map = new HashMap<>();
         this.current_position = new Point(0, 0);
+        this.current_heading = initial_heading;
         relative_map.put(new Point(0, 0), TileType.UNKNOWN);
 
     }
 
-    public void updatePos(DroneHeading heading) {
-        switch(heading) {
+    public void updatePos() {
+        switch(this.current_heading) {
             case NORTH:
                 this.current_position = new Point(this.current_position.x(), this.current_position.y() + 1);
             case SOUTH:
@@ -38,7 +40,10 @@ public class RelativeMap {
         
     }
 
-    public void updatePosTurn(DroneHeading heading, String direction) {
+    public void updatePosTurn(String direction) {
+        updatePos();
+        this.current_heading = this.current_heading.turn(direction);
+        updatePos();
         
     }
 
@@ -48,6 +53,9 @@ public class RelativeMap {
 
     }
 
+    public Point getCurrentPosition() { return new Point(this.current_position.x(), this.current_position.y());}
+
+    public DroneHeading getCurrentHeading() { return this.current_heading;}
 
     
 }

@@ -18,4 +18,11 @@ public class DroneController implements Controller {
         decision.put("parameters", new JSONObject().put("direction", direction)); 
         return decision.toString();
     }
+
+    @Override
+    public String stop() {
+        JSONObject decision = new JSONObject();
+        decision.put("action", "stop");
+        return decision.toString();
+    }
 }
