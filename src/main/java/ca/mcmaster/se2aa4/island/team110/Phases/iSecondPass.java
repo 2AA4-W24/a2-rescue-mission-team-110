@@ -21,12 +21,12 @@ public class iSecondPass implements Phase {
     private DroneController droneController = new DroneController();
     private DroneRadar droneRadar = new DroneRadar();
     private DroneScanner droneScanner = new DroneScanner();
-    private DroneHeading previous_direction;
+
     private DroneHeading initial_direction;
 
     private RelativeMap map;
 
-    private State current = State.INIT_U_TURN;
+    private State current_state = State.INIT_U_TURN;
     private int initTurnStage = 0;
     private int turnStage = 0;
 
@@ -35,7 +35,7 @@ public class iSecondPass implements Phase {
     private boolean waitingForEcho = false;
     private int groundDis = -2;
     private String directionToTurn = "";
-    private String mapDirUpdate = "";
+    
 
     private String echohere;
 
@@ -45,9 +45,10 @@ public class iSecondPass implements Phase {
     }
 
     private enum State {
-        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2, STOP; //stop state is a placeholder, used for debugging
+        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2; 
     }
 
+    @Override
     public boolean reachedEnd() {
         return isOutOfRange;
     }
@@ -115,7 +116,7 @@ public class iSecondPass implements Phase {
                     map.updatePosTurn("LEFT");
                 }
                
-                current = State.SCAN;
+                current_state = State.SCAN;
                 hasUturned = true;
                 return droneController.turn(directionToTurn);
             default:
@@ -153,7 +154,7 @@ public class iSecondPass implements Phase {
 
                 return droneController.turn(directionToTurn);
             case 2:
-                current = State.SCAN;
+                current_state = State.SCAN;
                 turnStage = 0;
                 hasUturned = true;
                 determineEcho();
@@ -163,27 +164,29 @@ public class iSecondPass implements Phase {
         }
     }
 
+    @Override
     public String getNextDecision() {
         logger.info("Phase: iSecondPass");
 
         if (current == State.FLY2 && groundDis > 0) {
+
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
 
-        switch (current) {
+        switch (current_state) {
             case ECHO:
-                current = State.SCAN;
+                current_state = State.SCAN;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
                 
             case SCAN:
-                current = State.FLY;
+                current_state = State.FLY;
                 hasUturned = false;
                 return droneScanner.scan();
             case FLY:
                 map.updatePos();
-                current = State.ECHO;
+                current_state = State.ECHO;
                 return droneController.fly();
             case INIT_U_TURN:
                 return initialUTurn();
@@ -194,23 +197,24 @@ public class iSecondPass implements Phase {
                 return droneRadar.echo(this.echohere);
                
             case FLY2:
+
                 if (groundDis == 0) {
                     current = State.SCAN;
+
                     groundDis = -2;
                 }
                 map.updatePos();
                 return droneController.fly();
-            case STOP:
-                return droneController.stop();
             default:
                 return null;
         }
 
     }
 
+    @Override
     public Phase getNextPhase() {
         logger.info("Second pass ended");
-        return null;
+        return new ReturnHome(this.map);
     }
 
     public void updateState(JSONObject response) {
@@ -222,7 +226,7 @@ public class iSecondPass implements Phase {
                         logger.info("hasUturned is True");
                         isOutOfRange = true;
                     } else {
-                        current = State.U_TURN;
+                        current_state = State.U_TURN;
                     }
                 }
             }
@@ -230,7 +234,7 @@ public class iSecondPass implements Phase {
                 JSONArray biomes = extras.getJSONArray("biomes");
                 if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
                     waitingForEcho = true;
-                    current = State.ECHO2;
+                    current_state = State.ECHO2;
                 }
             }
             if (extras.has("creeks")) {
@@ -254,8 +258,12 @@ public class iSecondPass implements Phase {
                 groundDis = extras.getInt("range");
                 logger.info("Ground distance updated to: {}", groundDis);
                 waitingForEcho = false;
-                current = State.FLY2;
+                current_state = State.FLY2;
             }
         }
+    }
+
+    public boolean isFinal() {
+        return false;
     }
 }

@@ -205,4 +205,8 @@ public class iFirstPass implements Phase {
             }
         }
     }
+
+    public boolean isFinal() {
+        return false;
+    }
 }

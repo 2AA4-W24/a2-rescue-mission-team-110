@@ -9,6 +9,7 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
+import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 
 public class FindGround implements Phase {
@@ -20,6 +21,7 @@ public class FindGround implements Phase {
 
     private DroneController droneController = new DroneController();
     private DroneRadar droneRadar = new DroneRadar();
+
     private State current_state;
 
     private RelativeMap map;
@@ -78,15 +80,18 @@ public class FindGround implements Phase {
                 current_state = State.FLY;
                 turnCompleted = true;
                 map.updatePosTurn("RIGHT");// relative map
+                DroneHeading direction = map.getCurrentHeading();
+                logger.info("The direction of the drone is {}", direction);
                 return droneController.turn(lastEchoDirection);
             case FLY:
                 current_state = State.FIND_GROUND;
                 map.updatePos();
                 return droneController.fly();
             default:
+                map.updatePos();
                 return droneController.fly();
         }
-}
+    }
 
     public void groundResponse(boolean groundFound) {
         groundDetected = groundFound;
@@ -100,6 +105,7 @@ public class FindGround implements Phase {
     @Override
     public Phase getNextPhase() {
         return new MoveToGround(map);
+        
     }
 
     @Override
@@ -114,5 +120,9 @@ public class FindGround implements Phase {
                 }
             }
         }
+    }
+
+    public boolean isFinal() {
+        return false;
     }
 }

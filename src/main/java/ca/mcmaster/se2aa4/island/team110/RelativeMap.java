@@ -32,12 +32,16 @@ public class RelativeMap {
         switch(this.current_heading) {
             case NORTH:
                 this.current_position = new Point(this.current_position.x(), this.current_position.y() + 1);
+                break;
             case SOUTH:
                 this.current_position = new Point(this.current_position.x(), this.current_position.y() - 1);
+                break;
             case EAST:
                 this.current_position = new Point(this.current_position.x() + 1, this.current_position.y());
+                break;
             case WEST:
                 this.current_position = new Point(this.current_position.x() - 1, this.current_position.y());
+                break;
         }
         
     }
