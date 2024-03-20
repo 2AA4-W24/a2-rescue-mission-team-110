@@ -48,6 +48,7 @@ public class iSecondPass implements Phase {
         ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2, STOP; //stop state is a placeholder, used for debugging
     }
 
+    @Override
     public boolean reachedEnd() {
         return isOutOfRange;
     }
@@ -163,6 +164,7 @@ public class iSecondPass implements Phase {
         }
     }
 
+    @Override
     public String getNextDecision() {
         logger.info("Phase: iSecondPass");
 
@@ -208,6 +210,7 @@ public class iSecondPass implements Phase {
 
     }
 
+    @Override
     public Phase getNextPhase() {
         logger.info("Second pass ended");
         return null;

@@ -86,7 +86,7 @@ public class FindGround implements Phase {
             default:
                 return droneController.fly();
         }
-}
+    }
 
     public void groundResponse(boolean groundFound) {
         groundDetected = groundFound;
