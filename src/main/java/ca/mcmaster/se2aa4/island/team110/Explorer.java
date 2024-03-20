@@ -20,7 +20,7 @@ public class Explorer implements IExplorerRaid {
 
     private DroneHeading droneHeading;
     private RelativeMap relativeMap;
-    private Phase current;
+    private Phase current_phase;
 
     @Override
     public void initialize(String s) {
@@ -32,7 +32,7 @@ public class Explorer implements IExplorerRaid {
         droneHeading = DroneHeading.getHeading(direction);
         relativeMap = new RelativeMap(droneHeading);
 
-        this.current = new FindGround(relativeMap);
+        this.current_phase = new FindGround(relativeMap);
 
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
@@ -42,7 +42,7 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String takeDecision() {
         JSONObject decision = new JSONObject();
-        JSONObject nextAction = new JSONObject(current.getNextDecision());
+        JSONObject nextAction = new JSONObject(current_phase.getNextDecision());
 
         decision.put("action", nextAction.get("action"));
         logger.info("** Decision: {}", decision.toString());
@@ -58,11 +58,14 @@ public class Explorer implements IExplorerRaid {
         JSONObject response = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Response received:\n" + response.toString(2));
 
-        this.current.updateState(response);
+        this.current_phase.updateState(response);
 
-        if (this.current.reachedEnd()) {
-            this.current = this.current.getNextPhase();
+        if (!this.current_phase.isFinal()) {
+            if (this.current_phase.reachedEnd()) {
+                this.current_phase = this.current_phase.getNextPhase();
+            }
         }
+        
 
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);

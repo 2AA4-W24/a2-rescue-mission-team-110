@@ -7,4 +7,5 @@ public interface Phase {
     String getNextDecision();
     Phase getNextPhase();
     void updateState(JSONObject response);
+    boolean isFinal();
 }

@@ -23,7 +23,7 @@ public class MoveToGround implements Phase {
 
     private RelativeMap map;
 
-    private State current;
+    private State current_state;
     private int range = -1;
     private String scan_direction;
 
@@ -31,7 +31,7 @@ public class MoveToGround implements Phase {
     private boolean hasScanGround = false;
 
     public MoveToGround(RelativeMap map) {
-        this.current = State.ECHO;
+        this.current_state = State.ECHO;
         this.map = map;
 
     }
@@ -68,19 +68,19 @@ public class MoveToGround implements Phase {
     public String getNextDecision() {
         logger.info("Phase: MoveToGround");
         if (range == -1) {
-            current = State.ECHO;
+            current_state = State.ECHO;
         } else if (range > 0) {
-            current = State.FLY;
+            current_state = State.FLY;
         } else if (range == 0) {
-            current = State.SCAN;
+            current_state = State.SCAN;
         }
 
-        switch (current) {
+        switch (current_state) {
             case ECHO:
                 determineScanDirection();
                 return droneRadar.echo(this.scan_direction);
             case SCAN:
-                current = State.FLY;
+                current_state = State.FLY;
                 return droneScanner.scan();
             case FLY:
                 if (range > 0) {
@@ -102,12 +102,16 @@ public class MoveToGround implements Phase {
 
     @Override
     public void updateState(JSONObject response) {
-    if (response.has("extras")) {
-        JSONObject extras = response.getJSONObject("extras");
-        if (extras.has("range")) {
-            range = extras.getInt("range");
-            logger.info("Range updated to: {}", range);
+        if (response.has("extras")) {
+            JSONObject extras = response.getJSONObject("extras");
+            if (extras.has("range")) {
+                range = extras.getInt("range");
+                logger.info("Range updated to: {}", range);
+            }
         }
     }
+
+    public boolean isFinal() {
+        return false;
     }
 }
