@@ -120,7 +120,7 @@ public class iFirstPass implements Phase {
     public String getNextDecision() {
         logger.info("Phase: iFirstPass");
 
-        if (current_state == State.FLY2 && groundDis >= 0) {
+        if (current_state == State.FLY2 && groundDis > 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
@@ -144,7 +144,7 @@ public class iFirstPass implements Phase {
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             case FLY2:
-                if (groundDis == -1) {
+                if (groundDis == 0) {
                     current_state = State.SCAN;
                     groundDis = -2;
                 }
