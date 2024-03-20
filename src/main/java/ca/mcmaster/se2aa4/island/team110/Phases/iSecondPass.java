@@ -166,7 +166,7 @@ public class iSecondPass implements Phase {
     public String getNextDecision() {
         logger.info("Phase: iSecondPass");
 
-        if (current == State.FLY2 && groundDis >= 0) {
+        if (current == State.FLY2 && groundDis > 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
@@ -194,7 +194,7 @@ public class iSecondPass implements Phase {
                 return droneRadar.echo(this.echohere);
                
             case FLY2:
-                if (groundDis == -1) {
+                if (groundDis == 0) {
                     current = State.SCAN;
                     groundDis = -2;
                 }
