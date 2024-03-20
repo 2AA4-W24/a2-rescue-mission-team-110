@@ -14,12 +14,14 @@ public class RelativeMap {
 
     private final Logger logger = LogManager.getLogger();
     private Map<Point, TileType> relative_map;
+    private Map<Point, String> creek_database;
     Point current_position;
     DroneHeading current_heading;
 
     
     public RelativeMap (DroneHeading initial_heading) {
         relative_map = new HashMap<>();
+        creek_database = new HashMap<>();
         this.current_position = new Point(0, 0);
         this.current_heading = initial_heading;
         relative_map.put(new Point(0, 0), TileType.UNKNOWN);
@@ -47,11 +49,62 @@ public class RelativeMap {
         
     }
 
-    public void addTile(int x, int y, TileType tileType){
-        Point newTile = new Point(x, y);
-        relative_map.put(newTile, tileType);
+    public void addTile(TileType tileType){
+        relative_map.put(this.current_position, tileType);
 
     }
+
+    public void addCreekID(String creekID) {
+        creek_database.put(this.current_position, creekID);
+
+    }
+
+    private Point getClosestCreek() {
+        Point closest_creek = null;
+        double closest_distance = Double.MAX_VALUE;
+        Point emergency_site = null;
+
+        for (Map.Entry<Point, TileType> entry : relative_map.entrySet()) {
+            Point point = entry.getKey();
+            TileType tileType = entry.getValue();
+
+            if (tileType == TileType.EMERGENCY_SITE) {
+                emergency_site = point;
+                break;
+            }
+    
+        }
+        
+        for (Map.Entry<Point, TileType> entry : relative_map.entrySet()) {
+            Point point = entry.getKey();
+            TileType tileType = entry.getValue();
+
+            if (tileType == TileType.CREEK) {
+                double distance = calculateDistance(point, emergency_site);
+                if (distance < closest_distance) {
+                    closest_creek = point;
+                    closest_distance = distance;
+                }
+            }
+        }
+
+        return closest_creek;
+    }
+
+    public String getClosestCreekId() {
+        Point closestCreek = getClosestCreek();
+        String creekID = "";
+        creekID = this.creek_database.get(closestCreek);
+
+        return creekID;
+
+    }
+
+    private static double calculateDistance(Point creek, Point emergency_site) {
+        double deltaX = emergency_site.x() - creek.x();
+        double deltaY = emergency_site.y() - creek.y();
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    } 
 
     public Point getCurrentPosition() { return new Point(this.current_position.x(), this.current_position.y());}
 
