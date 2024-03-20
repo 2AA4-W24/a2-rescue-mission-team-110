@@ -45,7 +45,7 @@ public class iSecondPass implements Phase {
     }
 
     private enum State {
-        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2, STOP; //stop state is a placeholder, used for debugging
+        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2; 
     }
 
     @Override
@@ -202,8 +202,6 @@ public class iSecondPass implements Phase {
                 }
                 map.updatePos();
                 return droneController.fly();
-            case STOP:
-                return droneController.stop();
             default:
                 return null;
         }
@@ -213,7 +211,7 @@ public class iSecondPass implements Phase {
     @Override
     public Phase getNextPhase() {
         logger.info("Second pass ended");
-        return null;
+        return new ReturnHome(this.map);
     }
 
     public void updateState(JSONObject response) {
