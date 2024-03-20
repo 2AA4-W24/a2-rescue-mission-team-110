@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.TileType;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
@@ -40,7 +41,6 @@ public class iSecondPass implements Phase {
 
     public iSecondPass(RelativeMap map) {
         this.map = map;
-
 
     }
 
@@ -234,6 +234,23 @@ public class iSecondPass implements Phase {
                     current = State.ECHO2;
                 }
             }
+            if (extras.has("creeks")) {
+                JSONArray creeks = extras.getJSONArray("creeks");
+                if (!creeks.isEmpty()) {
+                    map.addTile(TileType.CREEK);
+                    map.addCreekID(creeks.getString(0));
+                }
+                
+            }
+            if(extras.has("sites")) {
+                JSONArray emergency_site = extras.getJSONArray("sites");
+                if (!emergency_site.isEmpty()) {
+                    map.addTile(TileType.EMERGENCY_SITE);
+
+                }
+               
+            }
+                
             if (waitingForEcho && extras.has("range")) {
                 groundDis = extras.getInt("range");
                 logger.info("Ground distance updated to: {}", groundDis);

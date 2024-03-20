@@ -15,99 +15,99 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MoveToGround implements Phase {
-  private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
-  private DroneController droneController = new DroneController();
-  private DroneScanner droneScanner = new DroneScanner();
-  private DroneRadar droneRadar = new DroneRadar();
+    private DroneController droneController = new DroneController();
+    private DroneScanner droneScanner = new DroneScanner();
+    private DroneRadar droneRadar = new DroneRadar();
 
-  private RelativeMap map;
+    private RelativeMap map;
 
-  private State current;
-  private int range = -1;
-  private String scan_direction;
-  
+    private State current;
+    private int range = -1;
+    private String scan_direction;
 
-  private boolean hasScanGround = false;
 
-  public MoveToGround(RelativeMap map) {
-    this.current = State.ECHO;
-    this.map = map;
-   
-  }
+    private boolean hasScanGround = false;
 
-  private enum State {
-    FLY, SCAN, ECHO
-  }
+    public MoveToGround(RelativeMap map) {
+        this.current = State.ECHO;
+        this.map = map;
 
-  public void setHasScanGround(boolean hasScanGround) {
-    this.hasScanGround = hasScanGround;
-  }
-
-  public void determineScanDirection() {
-    switch(this.map.getCurrentHeading()) {
-      case NORTH:
-        scan_direction = "N";
-      case SOUTH:
-        scan_direction = "S";
-      case EAST:
-        scan_direction = "E";
-      case WEST:
-        scan_direction = "W";
     }
 
-  }
-
-
-  @Override
-  public boolean reachedEnd() {
-    return hasScanGround;
-  }
-
-  @Override
-  public String getNextDecision() {
-    logger.info("Phase: MoveToGround");
-    if (range == -1) {
-      current = State.ECHO;
-    } else if (range > 0) {
-      current = State.FLY;
-    } else if (range == 0) {
-      current = State.SCAN;
+    private enum State {
+        FLY, SCAN, ECHO;
     }
 
-    switch (current) {
-      case ECHO:
-        determineScanDirection();
-        return droneRadar.echo(this.scan_direction);
-      case SCAN:
-        current = State.FLY;
-        return droneScanner.scan();
-      case FLY:
-        if (range > 0) {
-          range--;
+    public void setHasScanGround(boolean hasScanGround) {
+        this.hasScanGround = hasScanGround;
+    }
+
+    public void determineScanDirection() {
+        switch(this.map.getCurrentHeading()) {
+            case NORTH:
+                scan_direction = "N";
+            case SOUTH:
+                scan_direction = "S";
+            case EAST:
+                scan_direction = "E";
+            case WEST:
+                scan_direction = "W";
         }
-        if (range == 0) {
-          hasScanGround = true;
-        }
-        return droneController.fly();
-      default:
-        return droneController.fly();
+
     }
-  }
 
-  @Override
-  public Phase getNextPhase() {
-    return new iFirstPass(this.map);
-  }
 
-  @Override
-  public void updateState(JSONObject response) {
+    @Override
+    public boolean reachedEnd() {
+        return hasScanGround;
+    }
+
+    @Override
+    public String getNextDecision() {
+        logger.info("Phase: MoveToGround");
+        if (range == -1) {
+            current = State.ECHO;
+        } else if (range > 0) {
+            current = State.FLY;
+        } else if (range == 0) {
+            current = State.SCAN;
+        }
+
+        switch (current) {
+            case ECHO:
+                determineScanDirection();
+                return droneRadar.echo(this.scan_direction);
+            case SCAN:
+                current = State.FLY;
+                return droneScanner.scan();
+            case FLY:
+                if (range > 0) {
+                    range--;
+                }
+                if (range == 0) {
+                    hasScanGround = true;
+                }
+                return droneController.fly();
+            default:
+                return droneController.fly();
+        }
+    }
+
+    @Override
+    public Phase getNextPhase() {
+        return new iFirstPass(this.map);
+    }
+
+    @Override
+    public void updateState(JSONObject response) {
     if (response.has("extras")) {
-      JSONObject extras = response.getJSONObject("extras");
-      if (extras.has("range")) {
-        range = extras.getInt("range");
-        logger.info("Range updated to: {}", range);
-      }
+        JSONObject extras = response.getJSONObject("extras");
+        if (extras.has("range")) {
+            range = extras.getInt("range");
+            logger.info("Range updated to: {}", range);
+        }
     }
-  }
+    }
 }
