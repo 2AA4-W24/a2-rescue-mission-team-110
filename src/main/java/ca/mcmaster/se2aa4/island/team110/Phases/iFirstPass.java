@@ -26,18 +26,20 @@ public class iFirstPass implements Phase {
 
     private RelativeMap map;
 
-    private State current_state = State.SCAN;
+    private State current = State.SCAN;
     private int turnStage = 0;
 
-
     private boolean isOutOfRange = false;
+    private boolean outOfRange = false;
     private boolean hasUturned = false;
     private boolean waitingForEcho = false;
-    private int groundDis = -2;
+    private boolean clearGround = false;
+    private boolean canClearGround = false;
+    private int groundDis = -1;
     private String directionToTurn = "";
 
-
     private String echohere;
+    private String uturnechohere;
 
     public iFirstPass(RelativeMap map) {
         this.map = map;
@@ -48,7 +50,7 @@ public class iFirstPass implements Phase {
     }
 
     // private enum Direction {
-    //   N, S, E
+    // N, S, E
     // }
 
     @Override
@@ -57,58 +59,74 @@ public class iFirstPass implements Phase {
     }
 
     public void determineEcho() {
-        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH){
+        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
             this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
-        } 
-        else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST){
+            this.uturnechohere = map.getCurrentHeading() == DroneHeading.NORTH ? "E" : "E"; // Change logic for all
+                                                                                            // cases
+        } else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST) {
             this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
         }
     }
 
-    private String makeUTurn() { //Only works for one case (Starting position is top left)
+    private String makeUTurn() { // Only works for one case (Starting position is top left)
         switch (turnStage) {
-            case 0: //check the current heading and determine which direction to turn for the U-turn
+            case 0:
+                turnStage++;
+                canClearGround = true;
+                determineEcho();
+                return droneRadar.echo(this.uturnechohere);
+            case 1:
+                if (outOfRange || clearGround) {
+                    turnStage++;
+                } else {
+                    turnStage = 0;
+                    map.updatePos();
+                    return droneController.fly();
+                }
+            case 2: // check the current heading and determine which direction to turn for the
+                    // U-turn
                 turnStage++;
                 this.previous_direction = map.getCurrentHeading();
 
-                if (map.getCurrentHeading() == DroneHeading.SOUTH) { 
+                if (map.getCurrentHeading() == DroneHeading.SOUTH) {
                     this.directionToTurn = "E";
                     map.updatePosTurn("LEFT");
-                }
-                else if (map.getCurrentHeading() == DroneHeading.NORTH) {
+                } else if (map.getCurrentHeading() == DroneHeading.NORTH) {
                     this.directionToTurn = "E";
                     map.updatePosTurn("RIGHT");
                 }
-        
+
                 return droneController.turn(directionToTurn);
 
-            case 1: //second stage of the u-turn, we should be in the middle of the u-turn right now
+            case 3: // second stage of the u-turn, we should be in the middle of the u-turn right
+                    // now
                 turnStage++;
                 if (this.previous_direction == DroneHeading.SOUTH) {
                     this.directionToTurn = "N";
                     map.updatePosTurn("LEFT");
-                
-                }
-                else if (this.previous_direction == DroneHeading.NORTH) {
+
+                } else if (this.previous_direction == DroneHeading.NORTH) {
                     this.directionToTurn = "S";
                     map.updatePosTurn("RIGHT");
                 }
                 // else if (this.previous_direction == DroneHeading.EAST) {
-                //   this.directionToTurn = "W";
-                //   map.updatePosTurn("LEFT");
+                // this.directionToTurn = "W";
+                // map.updatePosTurn("LEFT");
                 // }
                 // else if (this.previous_direction == DroneHeading.WEST) {
-                //   this.directionToTurn = "E";
-                //   map.updatePosTurn("RIGHT");
+                // this.directionToTurn = "E";
+                // map.updatePosTurn("RIGHT");
                 // }
 
                 logger.info("Turn: {}", directionToTurn);
 
                 return droneController.turn(directionToTurn);
-            case 2: // state to determine if we are at the end of the u-turn to get if we are at the end of scanning
-                current_state = State.SCAN;
+            case 4: // state to determine if we are at the end of the u-turn to get if we are at the
+                    // end of scanning
+                current = State.SCAN;
                 turnStage = 0;
                 hasUturned = true;
+                canClearGround = false;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             default:
@@ -120,22 +138,22 @@ public class iFirstPass implements Phase {
     public String getNextDecision() {
         logger.info("Phase: iFirstPass");
 
-        if (current_state == State.FLY2 && groundDis > 0) {
+        if (current == State.FLY2 && groundDis > 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
 
-        switch (current_state) {
+        switch (current) {
             case ECHO:
-                current_state = State.SCAN;
+                current = State.SCAN;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             case SCAN:
-                current_state = State.FLY;
+                current = State.FLY;
                 hasUturned = false;
                 return droneScanner.scan();
             case FLY:
-                current_state = State.ECHO;
+                current = State.ECHO;
                 map.updatePos();
                 return droneController.fly();
             case U_TURN:
@@ -145,8 +163,8 @@ public class iFirstPass implements Phase {
                 return droneRadar.echo(this.echohere);
             case FLY2:
                 if (groundDis == 0) {
-                    current_state = State.SCAN;
-                    groundDis = -2;
+                    current = State.SCAN;
+                    groundDis = -1;
                 }
                 map.updatePos();
                 return droneController.fly();
@@ -170,15 +188,18 @@ public class iFirstPass implements Phase {
                         logger.info("hasUturned is True");
                         isOutOfRange = true;
                     } else {
-                        current_state = State.U_TURN;
+                        outOfRange = true;
+                        current = State.U_TURN;
                     }
+                } else {
+                    outOfRange = false;
                 }
             }
             if (extras.has("biomes")) {
                 JSONArray biomes = extras.getJSONArray("biomes");
                 if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0))) {
                     waitingForEcho = true;
-                    current_state = State.ECHO2;
+                    current = State.ECHO2;
                 }
             }
             if (extras.has("creeks")) {
@@ -187,25 +208,29 @@ public class iFirstPass implements Phase {
                     map.addTile(TileType.CREEK);
                     map.addCreekID(creeks.getString(0));
                 }
-                
             }
-            if(extras.has("sites")) {
+            if (extras.has("sites")) {
                 JSONArray emergency_site = extras.getJSONArray("sites");
                 if (!emergency_site.isEmpty()) {
                     map.addTile(TileType.EMERGENCY_SITE);
 
                 }
-                
+
             }
             if (waitingForEcho && extras.has("range")) {
                 groundDis = extras.getInt("range");
                 logger.info("Ground distance updated to: {}", groundDis);
                 waitingForEcho = false;
-                current_state = State.FLY2;
+                current = State.FLY2;
+            }
+            if (canClearGround && extras.has("range")) {
+                clearGround = (extras.getInt("range") > 1);
+                current = State.U_TURN;
             }
         }
     }
 
+    @Override
     public boolean isFinal() {
         return false;
     }
