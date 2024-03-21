@@ -77,7 +77,11 @@ public class Explorer implements IExplorerRaid {
 
     @Override
     public String deliverFinalReport() {
-        return relativeMap.getClosestCreekId();
+        String closestCreek = relativeMap.getClosestCreekId();
+        logger.info("Successfully returned back to base");
+        logger.info("The closest creek to the emergency site is: {}", closestCreek);
+
+        return closestCreek;
     }
 
 }
