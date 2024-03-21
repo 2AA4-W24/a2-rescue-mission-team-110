@@ -61,6 +61,7 @@ public class MoveToGround implements Phase {
                 current = State.FLY;
                 return droneRadar.echo(this.echo_direction);
             case FLY:
+                map.updatePos();
                 return droneController.fly();
             default:
                 return null;

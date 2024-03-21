@@ -49,9 +49,6 @@ public class iFirstPass implements Phase {
         ECHO, FLY, SCAN, U_TURN, FLY2
     }
 
-    // private enum Direction {
-    // N, S, E
-    // }
 
     @Override
     public boolean reachedEnd() {
@@ -70,7 +67,7 @@ public class iFirstPass implements Phase {
 
     private String makeUTurn() { // Only works for one case (Starting position is top left)
         switch (turnStage) {
-            case -1:
+            case -1:    //
                 turnStage++;
                 return droneScanner.scan();
             case 0:
