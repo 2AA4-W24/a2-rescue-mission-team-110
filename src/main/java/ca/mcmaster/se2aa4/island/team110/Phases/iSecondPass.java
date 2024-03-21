@@ -33,8 +33,7 @@ public class iSecondPass implements Phase {
     private boolean isOutOfRange = false;
     private boolean outOfRange = false;
     private boolean hasUturned = false;
-    private boolean waitingForEcho = false;
-    private boolean okToEcho = true;
+    private boolean okToEchoFoward = true;
     private boolean clearGround = false;
     private boolean canClearGround = false;
     private int groundDis = -1;
@@ -50,7 +49,7 @@ public class iSecondPass implements Phase {
     }
 
     private enum State {
-        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, ECHO2, FLY2, STOP; // stop state is a placeholder, used for debugging
+        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, FLY2, STOP; // stop state is a placeholder, used for debugging
     }
 
     public boolean reachedEnd() {
@@ -179,7 +178,7 @@ public class iSecondPass implements Phase {
                 turnStage = -1;
                 hasUturned = true;
                 canClearGround = false;
-                okToEcho = true;
+                okToEchoFoward = true;
                 determineEcho();
                 return droneRadar.echo(this.echohere); // we need a method that determines the heading for u
             default:
@@ -197,30 +196,27 @@ public class iSecondPass implements Phase {
 
         switch (current) {
             case ECHO:
-                current = State.SCAN;
+                current = State.FLY;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
-
             case SCAN:
-                current = State.FLY;
+                current = State.ECHO;
                 hasUturned = false;
                 return droneScanner.scan();
             case FLY:
                 map.updatePos();
-                current = State.ECHO;
+                current = State.SCAN;
                 return droneController.fly();
             case INIT_U_TURN:
                 return initialUTurn();
             case U_TURN:
                 return makeUTurn();
-            case ECHO2:
-                determineEcho();
-                return droneRadar.echo(this.echohere);
-
             case FLY2:
                 if (groundDis == 0) {
                     current = State.SCAN;
                     groundDis = -1;
+                    map.updatePos();
+                    return droneController.fly();
                 }
                 map.updatePos();
                 return droneController.fly();
@@ -247,20 +243,21 @@ public class iSecondPass implements Phase {
                         isOutOfRange = true;
                     } else {
                         outOfRange = true;
-                        okToEcho = false;
+                        okToEchoFoward = false;
                         current = State.U_TURN;
                     }
                 } else {
                     outOfRange = false;
                 }
             }
-            if (extras.has("biomes")) {
-                JSONArray biomes = extras.getJSONArray("biomes");
-                if (okToEcho && biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
-                    waitingForEcho = true;
-                    current = State.ECHO2;
-                }
-            }
+            // if (extras.has("biomes")) {
+            // JSONArray biomes = extras.getJSONArray("biomes");
+            // if (okToEchoFoward && biomes.length() == 1 &&
+            // "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
+            // waitingForEcho = true;
+            // current = State.ECHO2;
+            // }
+            // }
             if (extras.has("creeks")) {
                 JSONArray creeks = extras.getJSONArray("creeks");
                 if (!creeks.isEmpty()) {
@@ -278,11 +275,12 @@ public class iSecondPass implements Phase {
 
             }
 
-            if (waitingForEcho && extras.has("range")) {
+            if (okToEchoFoward && extras.has("range")) {
                 groundDis = extras.getInt("range");
-                logger.info("Ground distance updated to: {}", groundDis);
-                waitingForEcho = false;
-                current = State.FLY2;
+                if (current != State.FLY2 && (groundDis > 0)) {
+                    logger.info("Ground distance updated to: {}", groundDis);
+                    current = State.FLY2;
+                }
             }
 
             if (canClearGround && extras.has("range")) {
