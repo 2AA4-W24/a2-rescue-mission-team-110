@@ -1,14 +1,11 @@
 package ca.mcmaster.se2aa4.island.team110.Phases;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
-import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
-
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import org.apache.logging.log4j.LogManager;
@@ -18,80 +15,55 @@ public class MoveToGround implements Phase {
     private final Logger logger = LogManager.getLogger();
 
     private DroneController droneController = new DroneController();
-    private DroneScanner droneScanner = new DroneScanner();
     private DroneRadar droneRadar = new DroneRadar();
 
     private RelativeMap map;
 
-    private State current_state;
+    private State current = State.ECHO;
     private int range = -1;
-    private String scan_direction;
+    private String echo_direction;
 
-
-    private boolean hasScanGround = false;
+    private boolean reachedGround = false;
 
     public MoveToGround(RelativeMap map) {
-        this.current_state = State.ECHO;
         this.map = map;
-
     }
 
     private enum State {
-        FLY, SCAN, ECHO;
+        FLY, ECHO;
     }
 
-    public void setHasScanGround(boolean hasScanGround) {
-        this.hasScanGround = hasScanGround;
-    }
-
-    public void determineScanDirection() {
-        switch(this.map.getCurrentHeading()) {
-            case NORTH:
-                scan_direction = "N";
-            case SOUTH:
-                scan_direction = "S";
-            case EAST:
-                scan_direction = "E";
-            case WEST:
-                scan_direction = "W";
+    public void determineEcho() {
+        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
+            this.echo_direction = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
+        } else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST) {
+            this.echo_direction = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
         }
-
     }
-
 
     @Override
     public boolean reachedEnd() {
-        return hasScanGround;
+        return reachedGround;
     }
 
     @Override
     public String getNextDecision() {
         logger.info("Phase: MoveToGround");
-        if (range == -1) {
-            current_state = State.ECHO;
-        } else if (range > 0) {
-            current_state = State.FLY;
-        } else if (range == 0) {
-            current_state = State.SCAN;
+        if (current == State.FLY && range > 1) {
+            current = State.FLY;
+            range--;
+        } else if (range == 1){
+            reachedGround = true;
         }
-
-        switch (current_state) {
+        switch (current) {
             case ECHO:
-                determineScanDirection();
-                return droneRadar.echo(this.scan_direction);
-            case SCAN:
-                current_state = State.FLY;
-                return droneScanner.scan();
+                determineEcho();
+                current = State.FLY;
+                return droneRadar.echo(this.echo_direction);
             case FLY:
-                if (range > 0) {
-                    range--;
-                }
-                if (range == 0) {
-                    hasScanGround = true;
-                }
                 return droneController.fly();
             default:
-                return droneController.fly();
+                return null;
         }
     }
 

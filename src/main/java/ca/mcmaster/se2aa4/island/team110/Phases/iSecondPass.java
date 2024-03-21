@@ -28,12 +28,13 @@ public class iSecondPass implements Phase {
 
     private State current = State.INIT_U_TURN;
     private int initTurnStage = 0;
-    private int turnStage = 0;
+    private int turnStage = -1;
 
     private boolean isOutOfRange = false;
     private boolean outOfRange = false;
     private boolean hasUturned = false;
     private boolean waitingForEcho = false;
+    private boolean okToEcho = true;
     private boolean clearGround = false;
     private boolean canClearGround = false;
     private int groundDis = -1;
@@ -130,6 +131,9 @@ public class iSecondPass implements Phase {
 
     private String makeUTurn() {
         switch (turnStage) {
+            case -1:
+                turnStage++;
+                return droneScanner.scan();
             case 0:
                 turnStage++;
                 canClearGround = true;
@@ -172,9 +176,10 @@ public class iSecondPass implements Phase {
                 return droneController.turn(directionToTurn);
             case 4:
                 current = State.SCAN;
-                turnStage = 0;
+                turnStage = -1;
                 hasUturned = true;
                 canClearGround = false;
+                okToEcho = true;
                 determineEcho();
                 return droneRadar.echo(this.echohere); // we need a method that determines the heading for u
             default:
@@ -242,6 +247,7 @@ public class iSecondPass implements Phase {
                         isOutOfRange = true;
                     } else {
                         outOfRange = true;
+                        okToEcho = false;
                         current = State.U_TURN;
                     }
                 } else {
@@ -250,7 +256,7 @@ public class iSecondPass implements Phase {
             }
             if (extras.has("biomes")) {
                 JSONArray biomes = extras.getJSONArray("biomes");
-                if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
+                if (okToEcho && biomes.length() == 1 && "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
                     waitingForEcho = true;
                     current = State.ECHO2;
                 }
@@ -285,7 +291,6 @@ public class iSecondPass implements Phase {
             }
         }
     }
-
 
     @Override
     public boolean isFinal() {

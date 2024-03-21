@@ -27,7 +27,7 @@ public class iFirstPass implements Phase {
     private RelativeMap map;
 
     private State current = State.SCAN;
-    private int turnStage = 0;
+    private int turnStage = -1;
 
     private boolean isOutOfRange = false;
     private boolean outOfRange = false;
@@ -35,6 +35,7 @@ public class iFirstPass implements Phase {
     private boolean waitingForEcho = false;
     private boolean clearGround = false;
     private boolean canClearGround = false;
+    private boolean okToEcho = true;
     private int groundDis = -1;
     private String directionToTurn = "";
 
@@ -70,6 +71,9 @@ public class iFirstPass implements Phase {
 
     private String makeUTurn() { // Only works for one case (Starting position is top left)
         switch (turnStage) {
+            case -1:
+                turnStage++;
+                return droneScanner.scan();
             case 0:
                 turnStage++;
                 canClearGround = true;
@@ -124,9 +128,10 @@ public class iFirstPass implements Phase {
             case 4: // state to determine if we are at the end of the u-turn to get if we are at the
                     // end of scanning
                 current = State.SCAN;
-                turnStage = 0;
+                turnStage = -1;
                 hasUturned = true;
                 canClearGround = false;
+                okToEcho = true;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             default:
@@ -188,6 +193,7 @@ public class iFirstPass implements Phase {
                         logger.info("hasUturned is True");
                         isOutOfRange = true;
                     } else {
+                        okToEcho = false;
                         outOfRange = true;
                         current = State.U_TURN;
                     }
@@ -197,7 +203,7 @@ public class iFirstPass implements Phase {
             }
             if (extras.has("biomes")) {
                 JSONArray biomes = extras.getJSONArray("biomes");
-                if (biomes.length() == 1 && "OCEAN".equals(biomes.getString(0))) {
+                if (okToEcho && biomes.length() == 1 && "OCEAN".equals(biomes.getString(0))) {
                     waitingForEcho = true;
                     current = State.ECHO2;
                 }
@@ -215,7 +221,6 @@ public class iFirstPass implements Phase {
                     map.addTile(TileType.EMERGENCY_SITE);
 
                 }
-
             }
             if (waitingForEcho && extras.has("range")) {
                 groundDis = extras.getInt("range");
