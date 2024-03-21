@@ -221,7 +221,6 @@ public class iFirstPass implements Phase {
                 JSONArray emergency_site = extras.getJSONArray("sites");
                 if (!emergency_site.isEmpty()) {
                     map.addTile(TileType.EMERGENCY_SITE);
-
                 }
             }
             if (okToEchoFoward && extras.has("range")) {
