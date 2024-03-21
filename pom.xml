@@ -107,7 +107,14 @@
           <daemonThreadJoinTimeout>${timeout}</daemonThreadJoinTimeout>
         </configuration>
       </plugin>
-
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-pmd-plugin</artifactId>
+      <version>3.21.2</version>
+      <configuration>
+        <targetJdk>17</targetJdk> 
+      </configuration>
+    </plugin>
     </plugins>
   </build>
 
