@@ -230,8 +230,8 @@ public class iFirstPass implements Phase {
                     current = State.FLY2;
                 }
             }
-            if (canClearGround && extras.has("range")) {
-                clearGround = (extras.getInt("range") > 20);
+            if (canClearGround && extras.has("range")) {  //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
+                clearGround = (extras.getInt("range") > 15);
                 current = State.U_TURN;
             }
         }
