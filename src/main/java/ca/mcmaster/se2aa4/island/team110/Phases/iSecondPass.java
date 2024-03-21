@@ -348,11 +348,11 @@ public class iSecondPass implements Phase {
                 }
             }
             if (canClearGround && extras.has("range")) {
-                clearGround = (extras.getInt("range") > 1);
+                clearGround = (extras.getInt("range") > 20);
                 current = State.U_TURN;
             }
             if (duringInitialUturn && extras.has("range")) {
-                uTurnOk = (extras.getInt("range") > 4);
+                uTurnOk = (extras.getInt("range") > 20);
                 current = State.INIT_U_TURN;
             }
         }

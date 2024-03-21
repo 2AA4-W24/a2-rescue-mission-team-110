@@ -231,7 +231,7 @@ public class iFirstPass implements Phase {
                 }
             }
             if (canClearGround && extras.has("range")) {
-                clearGround = (extras.getInt("range") > 1);
+                clearGround = (extras.getInt("range") > 20);
                 current = State.U_TURN;
             }
         }
