@@ -2,8 +2,8 @@ package ca.mcmaster.se2aa4.island.team110;
 
 
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+import ca.mcmaster.se2aa4.island.team110.Records.Point;
 
-import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +12,8 @@ public class TestableRelativeMap extends RelativeMap {
 
   private List<String> creekIDs = new ArrayList<>();
   private boolean emergencySiteFound = false;
+  private String emergencySiteID;
+  private Point currentPosition;
 
   public TestableRelativeMap(DroneHeading initialHeading) {
     super(initialHeading);
@@ -26,6 +28,10 @@ public class TestableRelativeMap extends RelativeMap {
     creekIDs.add(creekID);
   }
 
+  public boolean hasCreekID(String creekID) {
+    return creekIDs.contains(creekID);
+  }
+
   public String getCreekID() {
     return creekIDs.isEmpty() ? null : creekIDs.get(0);
   }
@@ -34,9 +40,25 @@ public class TestableRelativeMap extends RelativeMap {
     this.emergencySiteFound = found;
   }
 
-  public boolean hasEmergencySite() {
-    return this.emergencySiteFound;
-}
+  public void addEmergencySiteID(String siteID) {
+    this.emergencySiteID = siteID;
+    setEmergencySiteFound(true);
+  }
+
+  public boolean hasEmergencySite(String siteID) {
+    return emergencySiteFound && emergencySiteID.equals(siteID);
+  }
+
+  public void setCurrentPosition(Point newPosition) {
+    this.currentPosition = newPosition;
+  }
+
+  @Override
+  public Point getCurrentPosition() {
+      return this.currentPosition;
+  }
+
+  
 
   
 }
