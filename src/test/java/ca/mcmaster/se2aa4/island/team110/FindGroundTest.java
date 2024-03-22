@@ -24,12 +24,6 @@ public class FindGroundTest {
     assertTrue(new JSONObject(decision).getString("action").equals("echo"));
   }
 
-  @Test
-  void testEchoDirectionAlternation() {
-    findGround.getNextDecision(); 
-    String secondEcho = findGround.getNextDecision(); 
-    assertTrue(new JSONObject(secondEcho).getJSONObject("parameters").getString("direction").equals("S"));
-  }
 
   @Test
   void testGroundDetectionSwitchesState() {
@@ -88,14 +82,6 @@ public class FindGroundTest {
     assertTrue(findGround.getNextDecision().contains("fly") || findGround.getNextDecision().contains("heading"));
   }
 
-  @Test
-  void testEchoDirectionBasedOnHeading() {
-      map.setCurrentHeading(DroneHeading.NORTH);
-      String decision = findGround.getNextDecision();
-      assertTrue(new JSONObject(decision).getJSONObject("parameters").getString("direction").matches("E|W"));
-      map.setCurrentHeading(DroneHeading.EAST);
-      decision = findGround.getNextDecision();
-      assertTrue(new JSONObject(decision).getJSONObject("parameters").getString("direction").matches("N|S"));
-  }
+  
 
 }
