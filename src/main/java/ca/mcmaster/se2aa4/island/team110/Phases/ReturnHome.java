@@ -41,7 +41,8 @@ public class ReturnHome implements Phase {
         DroneHeading current_heading = map.getCurrentHeading();
         String heading_to_turn = "";
 
-        if (this.isHome) {
+        if (current_position.x() == 0 && current_position.y() == 0){
+            this.isHome = true;
             return droneController.stop();
         }
 
@@ -196,12 +197,8 @@ public class ReturnHome implements Phase {
         return null;
     }
 
-    @Override
     public void updateState(JSONObject response) {
-        Point current_position = map.getCurrentPosition();
-        if (current_position.x() == 0 && current_position.y() == 0){
-            this.isHome = true;
-        }
+        
     }
 
     public boolean isFinal() {

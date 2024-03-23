@@ -23,14 +23,19 @@ public class iFirstPassTest {
   @Test
   void testInitialState() {
     String decision = firstPass.getNextDecision();
-    assertEquals("scan", new JSONObject(decision).getString("action"));
+    String expectedDecision = "scan";
+    String actualDecision = new JSONObject(decision).getString("action");
+    assertEquals(expectedDecision, actualDecision);
   }
 
   @Test
   void testScanToEchoTransition() {
     firstPass.getNextDecision();
     firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
-    assertEquals("echo", new JSONObject(firstPass.getNextDecision()).getString("action"));
+    String decision = firstPass.getNextDecision();
+    String expectedDecision = "echo";
+    String actualDecision = new JSONObject(decision).getString("action");
+    assertEquals(expectedDecision, actualDecision);
   }
 
   @Test
@@ -39,11 +44,13 @@ public class iFirstPassTest {
     firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
     firstPass.getNextDecision();
     firstPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 2)));
-    assertEquals("fly", new JSONObject(firstPass.getNextDecision()).getString("action"));
+    String decision = firstPass.getNextDecision();
+    String expectedDecision = "fly";
+    String actualDecision = new JSONObject(decision).getString("action");
+    assertEquals(expectedDecision, actualDecision);
   }
 
  
-
   @Test
   void testUpdateStateWithCreeks() {
     JSONObject response = new JSONObject()
@@ -53,7 +60,6 @@ public class iFirstPassTest {
   }
 
   
-
   
   
 }
