@@ -7,6 +7,7 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,11 +21,13 @@ public class ReturnHome implements Phase {
    
     
     private RelativeMap map;
+    private Battery battery;
 
     private final Logger logger = LogManager.getLogger();
 
-    public ReturnHome(RelativeMap map) {
+    public ReturnHome(RelativeMap map, Battery battery) {
         this.map = map;
+        this.battery = battery;
     }
 
 

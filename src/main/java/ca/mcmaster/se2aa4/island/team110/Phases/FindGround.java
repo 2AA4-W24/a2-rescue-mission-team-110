@@ -11,12 +11,13 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 public class FindGround implements Phase {
     private final Logger logger = LogManager.getLogger();
 
     private enum State {
-        FIND_GROUND, GO_TO_GROUND, FLY
+        FIND_GROUND, GO_TO_GROUND, FLY, GO_HOME;
     }
 
     private DroneController droneController = new DroneController();
@@ -25,15 +26,18 @@ public class FindGround implements Phase {
     private State current_state;
 
     private RelativeMap map;
+    private Battery battery;
 
     private String lastEchoDirection = null;
-
     private boolean groundDetected = false;
     private boolean turnCompleted = false;
 
+    private boolean goHome = false;
 
-    public FindGround(RelativeMap map) {
+
+    public FindGround(RelativeMap map, Battery battery) {
         this.map = map;
+        this.battery = battery;
         this.current_state = State.FIND_GROUND;
      }
 
@@ -104,7 +108,7 @@ public class FindGround implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return new MoveToGround(map);
+        return new MoveToGround(map, battery);
         
     }
 

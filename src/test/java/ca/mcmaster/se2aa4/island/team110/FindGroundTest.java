@@ -15,7 +15,7 @@ public class FindGroundTest {
   @BeforeEach
   void setUp() {
     map = new TestableRelativeMap(DroneHeading.EAST);
-    findGround = new FindGround(map);
+    findGround = new FindGround(map, battery);
   }
 
   @Test

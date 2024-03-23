@@ -3,12 +3,15 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+
 import ca.mcmaster.se2aa4.island.team110.TileType;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 
@@ -25,6 +28,7 @@ public class iSecondPass implements Phase {
     private DroneHeading initial_direction;
 
     private RelativeMap map;
+    private Battery battery;
 
     private State current = State.INIT_U_TURN;
     private int initTurnStage = 0;
@@ -40,18 +44,21 @@ public class iSecondPass implements Phase {
     private boolean duringInitialUturn = true;
     private int groundDis = -1;
     private String directionToTurn = "";
-    private String mapDirUpdate = "";
+
 
     private String echohere;
     private String uturnechohere;
 
-    public iSecondPass(RelativeMap map) {
+    private boolean goHome = false;
+
+    public iSecondPass(RelativeMap map, Battery battery) {
         this.map = map;
+        this.battery = battery;
 
     }
 
     private enum State {
-        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, FLY2, STOP; // stop state is a placeholder, used for debugging
+        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, FLY2, GO_HOME; 
     }
 
     @Override
@@ -302,8 +309,6 @@ public class iSecondPass implements Phase {
                 }
                 map.updatePos();
                 return droneController.fly();
-            case STOP:
-                return droneController.stop();
             default:
                 return null;
         }

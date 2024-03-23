@@ -3,7 +3,7 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneScanner;
@@ -11,6 +11,8 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.TileType;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +27,7 @@ public class iFirstPass implements Phase {
     private DroneHeading previous_direction;
 
     private RelativeMap map;
+    private Battery battery;
 
     private State current = State.SCAN;
     private int turnStage = -1;
@@ -41,17 +44,17 @@ public class iFirstPass implements Phase {
     private String echohere;
     private String uturnechohere;
 
-    public iFirstPass(RelativeMap map) {
+    private boolean goHome = false;
+
+    public iFirstPass(RelativeMap map, Battery battery) {
         this.map = map;
+        this.battery = battery;
     }
 
     private enum State {
-        ECHO, FLY, SCAN, U_TURN, FLY2
+        ECHO, FLY, SCAN, U_TURN, FLY2, GO_HOME;
     }
 
-    // private enum Direction {
-    // N, S, E
-    // }
 
     @Override
     public boolean reachedEnd() {
@@ -181,7 +184,7 @@ public class iFirstPass implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return new iSecondPass(this.map);
+        return new iSecondPass(this.map, this.battery);
     }
 
     @Override

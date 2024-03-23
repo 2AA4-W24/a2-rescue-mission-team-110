@@ -2,10 +2,13 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 
 import org.json.JSONObject;
 
-import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import org.apache.logging.log4j.LogManager;
@@ -18,19 +21,23 @@ public class MoveToGround implements Phase {
     private DroneRadar droneRadar = new DroneRadar();
 
     private RelativeMap map;
+    private Battery battery;
 
-    private State current = State.ECHO;
+    private State current_state = State.ECHO;
     private int range = -1;
     private String echo_direction;
 
     private boolean reachedGround = false;
 
-    public MoveToGround(RelativeMap map) {
+    private boolean goHome = false;
+
+    public MoveToGround(RelativeMap map, Battery battery) {
         this.map = map;
+        this.battery = battery;
     }
 
     private enum State {
-        FLY, ECHO;
+        FLY, ECHO, GO_HOME;
     }
 
     public void determineEcho() {
@@ -49,16 +56,16 @@ public class MoveToGround implements Phase {
     @Override
     public String getNextDecision() {
         logger.info("Phase: MoveToGround");
-        if (current == State.FLY && range > 1) {
-            current = State.FLY;
+        if (current_state == State.FLY && range > 1) {
+            current_state = State.FLY;
             range--;
         } else if (range == 1){
             reachedGround = true;
         }
-        switch (current) {
+        switch (current_state) {
             case ECHO:
                 determineEcho();
-                current = State.FLY;
+                current_state = State.FLY;
                 return droneRadar.echo(this.echo_direction);
             case FLY:
                 return droneController.fly();
@@ -69,7 +76,7 @@ public class MoveToGround implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return new iFirstPass(this.map);
+        return new iFirstPass(this.map, this.battery);
     }
 
     @Override
@@ -80,6 +87,9 @@ public class MoveToGround implements Phase {
                 range = extras.getInt("range");
                 logger.info("Range updated to: {}", range);
             }
+        }
+        if (this.goHome = true) {
+            this.current_state = State.GO_HOME;
         }
     }
 
