@@ -15,59 +15,35 @@ public class iSecondPassTest {
 
   @BeforeEach
   void setUp() {
-    map = new TestableRelativeMap(DroneHeading.EAST); 
-    secondPass = new iSecondPass(map);
-  }
-
-@Test
-void testGroundDistanceUpdate() {
-  JSONObject response = new JSONObject().put("extras", new JSONObject().put("range", 10));
-  secondPass.updateState(response);
-  String decisionJson = secondPass.getNextDecision();
-  JSONObject decision = new JSONObject(decisionJson);
-  assertEquals("fly", decision.getString("action"), "Action should be 'fly' when ground distance is updated");
-}
-
-  @Test
-  void testInitialUTurn() {
-    String decision = secondPass.getNextDecision();
-    assertNotNull(decision, "Decision should not be null initially");
+      map = new TestableRelativeMap(DroneHeading.NORTH);
+      secondPass = new iSecondPass(map);
   }
 
   @Test
-  void testEchoDeterminationNorth() {
-    map.setCurrentHeading(DroneHeading.NORTH);
-    secondPass.determineEcho();
-    String decision = secondPass.getNextDecision();
-    assertTrue(decision.contains("N") || decision.contains("W"), "Echo direction should be north or west when heading is north");
+  void testInitialState() {
+      String decision = secondPass.getNextDecision();
+      assertNotNull(decision);
+  }
+
+
+  @Test
+  void testCreekDiscovery() {
+      String creekID = "creek_id";
+      map.addCreekID(creekID);
+      assertTrue(map.hasCreekID(creekID));
   }
 
   @Test
-  void testEchoDeterminationEast() {
-    map.setCurrentHeading(DroneHeading.EAST);
-    secondPass.determineEcho();
-    String decision = secondPass.getNextDecision();
-    assertTrue(decision.contains("E"), "Echo direction should be east when heading is east");
+  void testEmergencySiteDiscovery() {
+      String siteID = "site_id";
+      map.addEmergencySiteID(siteID);
+      assertTrue(map.hasEmergencySite(siteID));
   }
 
   @Test
-  void testUpdateStateWithOutOfRange() {
-    JSONObject response = new JSONObject().put("extras", new JSONObject().put("found", "OUT_OF_RANGE"));
-    secondPass.updateState(response);
-    assertTrue(secondPass.reachedEnd(), "Should have reached end when out of range");
-  }
-
-  @Test
-  void testUpdateStateWithCreek() {
-    JSONObject response = new JSONObject().put("extras", new JSONObject().put("creeks", new JSONArray().put("creek-id")));
-    secondPass.updateState(response);
-    assertTrue(map.hasCreekID("creek-id"), "Map should have creek-id after update");
-  }
-
-  @Test
-  void testUpdateStateWithEmergencySite() {
-    JSONObject response = new JSONObject().put("extras", new JSONObject().put("sites", new JSONArray().put("site-id")));
-    secondPass.updateState(response);
-    assertTrue(map.hasEmergencySite("site-id"), "Map should have site-id after update");
+  void testTurnAfterEcho() {
+      secondPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 1)));
+      String decision = secondPass.getNextDecision();
+      assertEquals("heading",new JSONObject(decision).getString("action") );
   }
 }

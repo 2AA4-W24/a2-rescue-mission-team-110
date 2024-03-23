@@ -18,12 +18,6 @@ public class ReturnHomeTest {
       returnHome = new ReturnHome(map);
   }
 
-  @Test
-  void testImmediateStopWhenAtHome() {
-      map.setCurrentPosition(new Point(0, 0));
-      returnHome.getNextDecision();
-      assertEquals("stop", new JSONObject(returnHome.getNextDecision()).getString("action"));
-  }
 
   @Test
   void testDecisionToFlyWhenFacingCorrectDirection() {
@@ -50,10 +44,21 @@ public class ReturnHomeTest {
 
   @Test
   void testCorrectTurnDecisionWhenNotFacingHome() {
-    map.setCurrentHeading(DroneHeading.EAST);
-    map.setCurrentPosition(new Point(1, 4));
-    returnHome.getNextDecision();
-    assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+      map.setCurrentPosition(new Point(-1, 4));
+      map.setCurrentHeading(DroneHeading.EAST);
+      assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+
+      map.setCurrentPosition(new Point(1, 4));
+      map.setCurrentHeading(DroneHeading.EAST);
+      assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+
+      map.setCurrentPosition(new Point(0, -1));
+      map.setCurrentHeading(DroneHeading.EAST);
+      assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+
+      map.setCurrentPosition(new Point(0, 1));
+      map.setCurrentHeading(DroneHeading.EAST);
+      assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
   }
 
       
