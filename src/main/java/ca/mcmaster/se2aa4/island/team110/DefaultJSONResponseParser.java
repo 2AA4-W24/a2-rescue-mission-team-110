@@ -10,7 +10,7 @@ import ca.mcmaster.se2aa4.island.team110.Interfaces.JSONResponseParser;
 public class DefaultJSONResponseParser implements JSONResponseParser{
     private final Logger logger = LogManager.getLogger();
 
-    public boolean echoFound(JSONObject response) { //returns a boolean depending on if ground is found through an echo
+    public boolean echoFound(JSONObject response) {
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras.has("found")) {

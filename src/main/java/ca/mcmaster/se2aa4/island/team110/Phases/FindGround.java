@@ -66,10 +66,7 @@ public class FindGround implements Phase {
     @Override
     public String getNextDecision() {
 
-        // if (battery.batteryLevel() < 200) {
-        //     this.goHome = true;
-        //     return droneController.fly();
-        // }
+       
 
         switch (current_state) {
             case FIND_GROUND:
