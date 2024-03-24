@@ -38,6 +38,7 @@ public class FindGround implements Phase {
 
     private boolean special_case = false; //Case for if echoing forward in the beginning detects ground
 
+    private int batteryThreshold = 500;
 
     public FindGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
@@ -107,6 +108,11 @@ public class FindGround implements Phase {
 
     @Override
     public void updateState(JSONObject response) {
+
+        int cost = this.parser.getCost(response);
+        this.battery.updateBatteryLevel(cost);
+
+
         boolean groundFound = this.parser.echoFound(response);
 
         if (groundFound && this.current_state == State.CHECK_FRONT) {
@@ -120,6 +126,10 @@ public class FindGround implements Phase {
         else {
             this.current_state = determineNextState();
         }
+
+        if (this.battery.getBatteryLevel() < this.batteryThreshold) {
+            this.goHome = true;
+        }
     }
 
     
@@ -129,63 +139,63 @@ public class FindGround implements Phase {
     }
 
     private String determineInitialEcho() {
-            DroneHeading initialHeading = map.getCurrentHeading();
-            switch(initialHeading) {
-                case NORTH:
-                    return "N";
-                case SOUTH:
-                    return "S";
-                case EAST:
-                    return "E";
-                case WEST:
-                    return "W";
-                default:
-                    return null;
-            }
-        }
-
-        private String getAndAlternateEchoDirection() {
-            String[] echoDirections;
-            if (DroneHeading.NORTH.equals(map.getCurrentHeading()) || DroneHeading.SOUTH.equals(map.getCurrentHeading())) {
-                echoDirections = new String[]{"E", "W"};
-            } 
-            else {  
-                echoDirections= new String[]{"N","S"};
-            }
-
-            
-            if (lastEchoDirection == null || !lastEchoDirection.equals(echoDirections[0])) {
-                lastEchoDirection = echoDirections[0];
-            } 
-            else {
-                lastEchoDirection= echoDirections[1];
-            }
-
-            return lastEchoDirection;
-        }
-
-        private State determineNextState() {
-            switch (this.current_state) {
-                case CHECK_FRONT:
-                    if (this.special_case) {
-                        return null;
-                    }
-                    return State.FIND_GROUND;
-                    
-                case FIND_GROUND:
-                    return State.FLY;
-
-                case TURN_TO_GROUND:
-                    map.updatePosTurn("RIGHT");
-                    return null;
-
-                case FLY:
-                    map.updatePos();
-                    return State.FIND_GROUND;
-
-                default:
-                    map.updatePos();
-                    return State.FLY;
-            }
+        DroneHeading initialHeading = map.getCurrentHeading();
+        switch(initialHeading) {
+            case NORTH:
+                return "N";
+            case SOUTH:
+                return "S";
+            case EAST:
+                return "E";
+            case WEST:
+                return "W";
+            default:
+                return null;
         }
     }
+
+    private String getAndAlternateEchoDirection() {
+        String[] echoDirections;
+        if (DroneHeading.NORTH.equals(map.getCurrentHeading()) || DroneHeading.SOUTH.equals(map.getCurrentHeading())) {
+            echoDirections = new String[]{"E", "W"};
+        } 
+        else {  
+            echoDirections= new String[]{"N","S"};
+        }
+
+        
+        if (lastEchoDirection == null || !lastEchoDirection.equals(echoDirections[0])) {
+            lastEchoDirection = echoDirections[0];
+        } 
+        else {
+            lastEchoDirection= echoDirections[1];
+        }
+
+        return lastEchoDirection;
+    }
+
+    private State determineNextState() {
+        switch (this.current_state) {
+            case CHECK_FRONT:
+                if (this.special_case) {
+                    return null;
+                }
+                return State.FIND_GROUND;
+                
+            case FIND_GROUND:
+                return State.FLY;
+
+            case TURN_TO_GROUND:
+                map.updatePosTurn("RIGHT");
+                return null;
+
+            case FLY:
+                map.updatePos();
+                return State.FIND_GROUND;
+
+            default:
+                map.updatePos();
+                return State.FLY;
+        }
+    }
+}

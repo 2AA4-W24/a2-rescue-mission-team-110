@@ -36,6 +36,7 @@ public class MoveToGround implements Phase {
     private boolean goHome = false;
     private boolean reachedGroundSpecial = false;
     private boolean special_case;
+    private int batteryThreshold = 500;
 
 
     public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {
@@ -86,6 +87,10 @@ public class MoveToGround implements Phase {
 
     @Override
     public void updateState(JSONObject response) {
+
+        int cost = this.parser.getCost(response);
+        this.battery.updateBatteryLevel(cost);
+
         if (this.parser.echoRange(response) != Integer.MAX_VALUE) {
             this.range = this.parser.echoRange(response);
         }
@@ -105,6 +110,9 @@ public class MoveToGround implements Phase {
             else {
                 this.current_state = determineNextState();
             }
+        }
+        if (this.battery.getBatteryLevel() < this.batteryThreshold) {
+            this.goHome = true;
         }
        
     }

@@ -21,7 +21,6 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                     return false;
                 }
             }
-
         }
 
         return false;
@@ -52,6 +51,9 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                     // map.addCreekID(creeks.getString(0));
                 }
             }
+            else {
+                return null;
+            }
             if (extras.has("sites")) {
                 JSONArray emergency_site = extras.getJSONArray("sites");
                 if (!emergency_site.isEmpty()) {
@@ -74,6 +76,9 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                     return creeks;
                     // map.addTile(TileType.CREEK);
                     // map.addCreekID(creeks.getString(0));
+                }
+                else {
+                    return null;
                 }
             }
             // if (extras.has("sites")) {

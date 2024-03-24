@@ -34,7 +34,7 @@ public class iFirstPass implements Phase {
     private boolean special_case;
 
 
-    private State current = State.SCAN;
+    private State current_state = State.SCAN;
     private int turnStage = -1;
 
     private boolean isOutOfRange = false;
@@ -48,8 +48,9 @@ public class iFirstPass implements Phase {
 
     private String echohere;
     private String uturnechohere;
-
     private boolean goHome = false;
+
+    private int batteryThreshold = 500;
 
     public iFirstPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {
         this.map = map;
@@ -74,23 +75,23 @@ public class iFirstPass implements Phase {
     public String getNextDecision() {
         logger.info("Phase: iFirstPass");
 
-        if (current == State.FLY2 && groundDis > 0) {
+        if (current_state == State.FLY2 && groundDis > 0) {
             groundDis--;
             logger.error("Flying towards ground, distance left: {}", groundDis);
         }
 
-        switch (current) {
+        switch (current_state) {
             case ECHO:  
-                current = State.FLY;
+                current_state = State.FLY;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             case SCAN:
-                current = State.ECHO;
+                current_state = State.ECHO;
                 hasUturned = false;
                 return droneScanner.scan();
             case FLY:
-                current = State.SCAN;
-                map.updatePos();
+                current_state = State.SCAN;
+                this.map.updatePos();
                 return droneController.fly();
             case U_TURN:
                 return makeUTurn();
@@ -99,19 +100,17 @@ public class iFirstPass implements Phase {
             // return droneRadar.echo(this.echohere);
             case FLY2:
                 if (groundDis == 0) {
-                    current = State.SCAN;
+                    current_state = State.SCAN;
                     groundDis = -1;
-                    map.updatePos();
+                    this.map.updatePos();
                     return droneController.fly();
                 } 
-                map.updatePos();
+                this.map.updatePos();
                 return droneController.fly();
             default:
                 return null;
         }
     }
-
-    
 
     
 
@@ -127,84 +126,54 @@ public class iFirstPass implements Phase {
 
     @Override
     public void updateState(JSONObject response) {
-        boolean found = this.parser.echoFound(response);
-        if (!found) {
-            if (this.hasUturned) {
-                this.isOutOfRange = true;
-            }
-            else {
-                this.okToEchoFoward = false;
-                this.outOfRange = true;
-                this.current = State.U_TURN;
-            }
+
+        int cost = this.parser.getCost(response);
+        this.battery.updateBatteryLevel(cost);
+
+
+        if (this.parser.scanTile(response) != null) {
+            TileType tile = this.parser.scanTile(response);
+            map.addTile(tile);
         }
-        else {
-            this.outOfRange = false;
+        
+
+        if (this.parser.getID(response) != null) {
+            JSONArray id = this.parser.getID(response);
+            map.addCreekID(id.getString(0));
         }
-
-        // TileType tile = this.parser.scanTile(response);
-        // this.map.addTile(tile);
-
-        // JSONArray array = this.parser.getID(response);
-        // if (array != null) {
-        //     this.map.addCreekID(array.getString(0));
-        // }
-
-        // if(this.okToEchoFoward) {
-        //     int range = this.parser.echoRange(response);
-        //     if (this.current != State.FLY2 && (range > 0)) {
-        //         this.current = State.FLY2;
-        //     }
-        // }
-
-        // if(this.canClearGround) {
-        //     int range = this.parser.echoRange(response);
-        //     clearGround = (range > 15);
-        //     current = State.U_TURN;
-        // }
-       
-
+        
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
-            // if (extras.has("found")) {
-            //     if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
-            //         if (hasUturned) {
-            //             logger.info("hasUturned is True");
-            //             isOutOfRange = true;
-            //         } else {
-            //             okToEchoFoward = false;
-            //             outOfRange = true;
-            //             current = State.U_TURN;
-            //         }
-            //     } else {
-            //         outOfRange = false;
-            //     }
-            // }
-        
-            if (extras.has("creeks")) {
-                JSONArray creeks = extras.getJSONArray("creeks");
-                if (!creeks.isEmpty()) {
-                    map.addTile(TileType.CREEK);
-                    map.addCreekID(creeks.getString(0));
+            if (extras.has("found")) {
+                if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
+                    if (hasUturned) {
+                        logger.info("hasUturned is True");
+                        isOutOfRange = true;
+                    } else {
+                        okToEchoFoward = false;
+                        outOfRange = true;
+                        this.current_state = State.U_TURN;
+                    }
+                } else {
+                    outOfRange = false;
                 }
             }
-            if (extras.has("sites")) {
-                JSONArray emergency_site = extras.getJSONArray("sites");
-                if (!emergency_site.isEmpty()) {
-                    map.addTile(TileType.EMERGENCY_SITE);
-                }
-            }
+    
             if (okToEchoFoward && extras.has("range")) {
                 groundDis = extras.getInt("range");
-                if (current != State.FLY2 && (groundDis > 0)) {
+                if (this.current_state != State.FLY2 && (groundDis > 0)) {
                     logger.info("Ground distance updated to: {}", groundDis);
-                    current = State.FLY2;
+                    this.current_state = State.FLY2;
                 }
             }
             if (canClearGround && extras.has("range")) {  //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
                 clearGround = (extras.getInt("range") > 15);
-                current = State.U_TURN;
+                this.current_state = State.U_TURN;
             }
+        }
+
+        if (this.battery.getBatteryLevel() < this.batteryThreshold) {
+            this.goHome = true;
         }
     }
 
@@ -236,7 +205,8 @@ public class iFirstPass implements Phase {
             case 1:
                 if (outOfRange || clearGround) {
                     turnStage++;
-                } else {
+                } 
+                else {
                     turnStage = 0;
                     map.updatePos();
                     return droneController.fly();
@@ -281,13 +251,33 @@ public class iFirstPass implements Phase {
                 return droneController.turn(directionToTurn);
             case 4: // state to determine if we are at the end of the u-turn to get if we are at the
                     // end of scanning
-                current = State.SCAN;
+                current_state = State.SCAN;
                 turnStage = -1;
                 hasUturned = true;
                 canClearGround = false;
                 okToEchoFoward = true;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
+            default:
+                return null;
+        }
+    }
+
+    private State determineNextState() {
+        switch(this.current_state) {
+            case ECHO:
+                return State.FLY;
+            case SCAN:
+                return State.ECHO;
+            case FLY:
+                return State.SCAN;
+            case U_TURN:
+                return State.SCAN;
+            case FLY2:
+                if (this.groundDis == -1) {
+                    return State.SCAN;
+                }
+                return State.FLY2;
             default:
                 return null;
         }
