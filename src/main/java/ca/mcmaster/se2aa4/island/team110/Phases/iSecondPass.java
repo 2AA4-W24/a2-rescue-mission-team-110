@@ -58,11 +58,14 @@ public class iSecondPass implements Phase {
     }
 
     private enum State {
-        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, FLY2, GO_HOME; 
+        ECHO, FLY, SCAN, INIT_U_TURN, U_TURN, FLY2; 
     }
 
     @Override
     public boolean reachedEnd() {
+        if (goHome) {
+            return goHome;
+        }
         return isOutOfRange;
     }
 
@@ -217,6 +220,7 @@ public class iSecondPass implements Phase {
         }
     }
 
+
     private String makeUTurn() {
         switch (turnStage) {
             case -1:
@@ -317,8 +321,13 @@ public class iSecondPass implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        logger.info("Second pass ended");
-        return null;
+        if (this.goHome) {
+            return new ReturnHome(map, battery);
+        }
+        else {
+            return new ReturnHome(map, battery);
+        }
+        
     }
 
     @Override

@@ -37,7 +37,7 @@ public class MoveToGround implements Phase {
     }
 
     private enum State {
-        FLY, ECHO, GO_HOME;
+        FLY, ECHO;
     }
 
     public void determineEcho() {
@@ -50,6 +50,9 @@ public class MoveToGround implements Phase {
 
     @Override
     public boolean reachedEnd() {
+        if (goHome) {
+            return goHome;
+        }
         return reachedGround;
     }
 
@@ -76,6 +79,9 @@ public class MoveToGround implements Phase {
 
     @Override
     public Phase getNextPhase() {
+        if (goHome) {
+            return new ReturnHome(this.map, this.battery);
+        }
         return new iFirstPass(this.map, this.battery);
     }
 
@@ -88,9 +94,7 @@ public class MoveToGround implements Phase {
                 logger.info("Range updated to: {}", range);
             }
         }
-        if (this.goHome = true) {
-            this.current_state = State.GO_HOME;
-        }
+       
     }
 
     @Override

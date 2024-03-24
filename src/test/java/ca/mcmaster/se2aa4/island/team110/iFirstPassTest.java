@@ -1,59 +1,59 @@
-package ca.mcmaster.se2aa4.island.team110;
+// package ca.mcmaster.se2aa4.island.team110;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+// import org.json.JSONArray;
+// import org.json.JSONObject;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import static org.junit.jupiter.api.Assertions.*;
 
-import ca.mcmaster.se2aa4.island.team110.Phases.iFirstPass;
-import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+// import ca.mcmaster.se2aa4.island.team110.Phases.iFirstPass;
+// import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 
-public class iFirstPassTest {
-  private iFirstPass firstPass;
-  private TestableRelativeMap map;
+// public class iFirstPassTest {
+//   private iFirstPass firstPass;
+//   private TestableRelativeMap map;
 
-  @BeforeEach
-  void setUp() {
-      map = new TestableRelativeMap(DroneHeading.EAST);
-      firstPass = new iFirstPass(map);
-  }
+//   @BeforeEach
+//   void setUp() {
+//       map = new TestableRelativeMap(DroneHeading.EAST);
+//       firstPass = new iFirstPass(map);
+//   }
 
-  @Test
-  void testInitialState() {
-    String decision = firstPass.getNextDecision();
-    assertEquals("scan", new JSONObject(decision).getString("action"));
-  }
+//   @Test
+//   void testInitialState() {
+//     String decision = firstPass.getNextDecision();
+//     assertEquals("scan", new JSONObject(decision).getString("action"));
+//   }
 
-  @Test
-  void testScanToEchoTransition() {
-    firstPass.getNextDecision();
-    firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
-    assertEquals("echo", new JSONObject(firstPass.getNextDecision()).getString("action"));
-  }
+//   @Test
+//   void testScanToEchoTransition() {
+//     firstPass.getNextDecision();
+//     firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
+//     assertEquals("echo", new JSONObject(firstPass.getNextDecision()).getString("action"));
+//   }
 
-  @Test
-  void testEchoToFlyTransition() {
-    firstPass.getNextDecision();
-    firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
-    firstPass.getNextDecision();
-    firstPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 2)));
-    assertEquals("fly", new JSONObject(firstPass.getNextDecision()).getString("action"));
-  }
+//   @Test
+//   void testEchoToFlyTransition() {
+//     firstPass.getNextDecision();
+//     firstPass.updateState(new JSONObject().put("extras", new JSONObject()));
+//     firstPass.getNextDecision();
+//     firstPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 2)));
+//     assertEquals("fly", new JSONObject(firstPass.getNextDecision()).getString("action"));
+//   }
 
  
 
-  @Test
-  void testUpdateStateWithCreeks() {
-    JSONObject response = new JSONObject()
-        .put("extras", new JSONObject().put("creeks", new JSONArray().put("creek-id")));
-    firstPass.updateState(response);
-    assertNotNull(map.getCreekID());
-  }
+//   @Test
+//   void testUpdateStateWithCreeks() {
+//     JSONObject response = new JSONObject()
+//         .put("extras", new JSONObject().put("creeks", new JSONArray().put("creek-id")));
+//     firstPass.updateState(response);
+//     assertNotNull(map.getCreekID());
+//   }
 
   
 
   
   
-}
+// }

@@ -58,6 +58,9 @@ public class iFirstPass implements Phase {
 
     @Override
     public boolean reachedEnd() {
+        if (goHome) {
+            return goHome;
+        }
         return isOutOfRange;
     }
 
@@ -184,7 +187,12 @@ public class iFirstPass implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return new iSecondPass(this.map, this.battery);
+        if (this.goHome) {
+            return new ReturnHome(map, battery);
+        }
+        else {
+            return new iSecondPass(map, battery);
+        }
     }
 
     @Override
