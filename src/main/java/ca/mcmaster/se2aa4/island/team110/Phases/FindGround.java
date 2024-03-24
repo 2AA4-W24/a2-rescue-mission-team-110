@@ -82,15 +82,18 @@ public class FindGround implements Phase {
                 return droneRadar.echo(nextEchoDirection);
 
             case TURN_TO_GROUND:
+                map.updatePosTurn("RIGHT");
                 turnCompleted = true;
                 DroneHeading direction = map.getCurrentHeading();
                 logger.info("The direction of the drone is {}", direction);
                 return droneController.turn(lastEchoDirection);
 
             case FLY:
+                map.updatePos();
                 return droneController.fly();
 
             default:
+                map.updatePos();
                 return droneController.fly();
         }
     }
@@ -185,15 +188,13 @@ public class FindGround implements Phase {
                 return State.FLY;
 
             case TURN_TO_GROUND:
-                map.updatePosTurn("RIGHT");
                 return null;
 
             case FLY:
-                map.updatePos();
+                
                 return State.FIND_GROUND;
 
             default:
-                map.updatePos();
                 return State.FLY;
         }
     }
