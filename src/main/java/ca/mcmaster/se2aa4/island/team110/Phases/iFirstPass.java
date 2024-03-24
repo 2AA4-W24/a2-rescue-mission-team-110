@@ -32,8 +32,6 @@ public class iFirstPass implements Phase {
     private Battery battery;
     private DefaultJSONResponseParser parser;
 
-    private boolean special_case;
-
 
     private State current_state = State.SCAN;
     private int turnStage = -1;
@@ -66,42 +64,34 @@ public class iFirstPass implements Phase {
 
     @Override
     public boolean reachedEnd() {
-        if (goHome) {
-            return goHome;
+        if (this.goHome) {
+            return this.goHome;
         }
-        return isOutOfRange;
+        return this.isOutOfRange;
     }
     @Override
     public String getNextDecision() {
         logger.info("Phase: iFirstPass");
 
-        if (current_state == State.FLY2 && groundDis > 0) {
-            groundDis--;
-            logger.error("Flying towards ground, distance left: {}", groundDis);
-        }
-
         switch (current_state) {
             case ECHO:  
-                current_state = State.FLY;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             case SCAN:
-                current_state = State.ECHO;
-                hasUturned = false;
+                this.hasUturned = false;
                 return droneScanner.scan();
             case FLY:
-                current_state = State.SCAN;
                 this.map.updatePos();
                 return droneController.fly();
             case U_TURN:
                 return makeUTurn();
-            // case ECHO2:
-            // determineEcho();
-            // return droneRadar.echo(this.echohere);
             case FLY2:
-                if (groundDis == 0) {
-                    current_state = State.SCAN;
-                    groundDis = -1;
+                if (this.groundDis > 0) {
+                    this.groundDis--;
+                }
+
+                if (this.groundDis == 0) {    
+                    this.groundDis = -1;
                     this.map.updatePos();
                     return droneController.fly();
                 } 
@@ -130,8 +120,9 @@ public class iFirstPass implements Phase {
         int cost = this.parser.getCost(response);
         this.battery.updateBatteryLevel(cost);
 
-
-       // this.current_state = determineNextState();
+    
+        this.current_state = determineNextState();
+    
 
         if (this.parser.scanTile(response) != null) {
             TileType tile = this.parser.scanTile(response);
@@ -150,26 +141,26 @@ public class iFirstPass implements Phase {
                 if ("OUT_OF_RANGE".equals(extras.getString("found"))) {
                     if (hasUturned) {
                         logger.info("hasUturned is True");
-                        isOutOfRange = true;
+                        this.isOutOfRange = true;
                     } else {
-                        okToEchoFoward = false;
-                        outOfRange = true;
+                        this.okToEchoFoward = false;
+                        this.outOfRange = true;
                         this.current_state = State.U_TURN;
                     }
                 } else {
-                    outOfRange = false;
+                    this.outOfRange = false;
                 }
             }
     
-            if (okToEchoFoward && extras.has("range")) {
-                groundDis = extras.getInt("range");
+            if (this.okToEchoFoward && extras.has("range")) {
+                this.groundDis = extras.getInt("range");
                 if (this.current_state != State.FLY2 && (groundDis > 0)) {
                     logger.info("Ground distance updated to: {}", groundDis);
                     this.current_state = State.FLY2;
                 }
             }
-            if (canClearGround && extras.has("range")) {  //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
-                clearGround = (extras.getInt("range") > 15);
+            if (this.canClearGround && extras.has("range")) {  //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
+                this.clearGround = (extras.getInt("range") > 15);
                 this.current_state = State.U_TURN;
             }
         }
@@ -185,27 +176,27 @@ public class iFirstPass implements Phase {
     }
     
     public void determineEcho() {
-        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
-            this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
-            this.uturnechohere = map.getCurrentHeading() == DroneHeading.NORTH ? "E" : "E"; // Change logic for all
+        if (this.map.getCurrentHeading() == DroneHeading.NORTH || this.map.getCurrentHeading() == DroneHeading.SOUTH) {
+            this.echohere = this.map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
+            this.uturnechohere = this.map.getCurrentHeading() == DroneHeading.NORTH ? "E" : "E"; // Change logic for all
                                                                                             // cases
-        } else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST) {
-            this.echohere = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
+        } else if (this.map.getCurrentHeading() == DroneHeading.EAST || this.map.getCurrentHeading() == DroneHeading.WEST) {
+            this.echohere = this.map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
         }
     }
 
     private String makeUTurn() { // Only works for one case (Starting position is top left)
-        switch (turnStage) {
+        switch (this.turnStage) {
             case -1:
                 turnStage++;
                 return droneScanner.scan();
             case 0:
                 turnStage++;
-                canClearGround = true;
+                this.canClearGround = true;
                 determineEcho();
                 return droneRadar.echo(this.uturnechohere);
             case 1:
-                if (outOfRange || clearGround) {
+                if (this.outOfRange || this.clearGround) {
                     turnStage++;
                 } 
                 else {
@@ -274,7 +265,12 @@ public class iFirstPass implements Phase {
             case FLY:
                 return State.SCAN;
             case U_TURN:
-                return State.SCAN;
+                if (this.hasUturned) {
+                    return State.SCAN;
+                }
+                else {
+                    return State.U_TURN;
+                }
             case FLY2:
                 if (this.groundDis == -1) {
                     return State.SCAN;
