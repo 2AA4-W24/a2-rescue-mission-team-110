@@ -32,7 +32,7 @@ public class iSecondPass implements Phase {
     private Battery battery;
     private DefaultJSONResponseParser parser;
 
-    private State current = State.INIT_U_TURN;
+    private State current_state;
     private int initTurnStage = 0;
     private int turnStage = -1;
 
@@ -44,6 +44,7 @@ public class iSecondPass implements Phase {
     private boolean clearGround = false;
     private boolean canClearGround = false;
     private boolean duringInitialUturn = true;
+    private boolean hasInitUTurned = false;
     private int groundDis = -1;
     private String directionToTurn = "";
 
@@ -59,6 +60,8 @@ public class iSecondPass implements Phase {
         this.map = map;
         this.battery = battery;
         this.parser = parser;
+
+        this.current_state = State.INIT_U_TURN;
 
     }
 
@@ -79,31 +82,25 @@ public class iSecondPass implements Phase {
     public String getNextDecision() {
         logger.info("Phase: iSecondPass");
 
-        if (current == State.FLY2 && groundDis > 0) {
-            groundDis--;
-            logger.error("Flying towards ground, distance left: {}", groundDis);
-        }
-
-        switch (current) {
+        switch (current_state) {
             case ECHO:
-                current = State.FLY;
                 determineEcho();
                 return droneRadar.echo(this.echohere);
             case SCAN:
-                current = State.ECHO;
                 hasUturned = false;
                 return droneScanner.scan();
             case FLY:
                 map.updatePos();
-                current = State.SCAN;
                 return droneController.fly();
             case INIT_U_TURN:
                 return initialUTurn();
             case U_TURN:
                 return makeUTurn();
             case FLY2:
+                if (this.groundDis > 0) {
+                    groundDis--;
+                }
                 if (groundDis == 0) {
-                    current = State.SCAN;
                     groundDis = -1;
                     map.updatePos();
                     return droneController.fly();
@@ -132,6 +129,21 @@ public class iSecondPass implements Phase {
 
         int cost = this.parser.getCost(response);
         this.battery.updateBatteryLevel(cost);
+
+    
+        this.current_state = determineNextState();
+    
+
+        if (this.parser.scanTile(response) != null) {
+            TileType tile = this.parser.scanTile(response);
+            map.addTile(tile);
+        }
+        
+
+        if (this.parser.getID(response) != null) {
+            JSONArray id = this.parser.getID(response);
+            map.addCreekID(id.getString(0));
+        }
         
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
@@ -142,51 +154,30 @@ public class iSecondPass implements Phase {
                         isOutOfRange = true;
                     } else if (duringInitialUturn) {
                         outOfRange = true;
-                        current = State.INIT_U_TURN;
+                        current_state = State.INIT_U_TURN;
                     } else {
                         okToEchoFoward = false;
                         outOfRange = true;
-                        current = State.U_TURN;
+                        current_state = State.U_TURN;
                     }
                 } else {
                     outOfRange = false;
                 }
             }
-            // if (extras.has("biomes")) {
-            // JSONArray biomes = extras.getJSONArray("biomes");
-            // if (okToEchoFoward && biomes.length() == 1 &&
-            // "OCEAN".equals(biomes.getString(0)) && !hasUturned) {
-            // waitingForEcho = true;
-            // current = State.ECHO2;
-            // }
-            // }
-            if (extras.has("creeks")) {
-                JSONArray creeks = extras.getJSONArray("creeks");
-                if (!creeks.isEmpty()) {
-                    map.addTile(TileType.CREEK);
-                    map.addCreekID(creeks.getString(0));
-                }
-            }
-            if (extras.has("sites")) {
-                JSONArray emergency_site = extras.getJSONArray("sites");
-                if (!emergency_site.isEmpty()) {
-                    map.addTile(TileType.EMERGENCY_SITE);
-                }
-            }
             if (okToEchoFoward && extras.has("range")) {
                 groundDis = extras.getInt("range");
-                if (current != State.FLY2 && (groundDis > 0)) {
+                if (current_state != State.FLY2 && (groundDis > 0)) {
                     logger.info("Ground distance updated to: {}", groundDis);
-                    current = State.FLY2;
+                    current_state = State.FLY2;
                 }
             }
             if (canClearGround && extras.has("range")) { //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
                 clearGround = (extras.getInt("range") > 15);
-                current = State.U_TURN;
+                current_state = State.U_TURN;
             }
             if (duringInitialUturn && extras.has("range")) {
                 uTurnOk = (extras.getInt("range") > 5);
-                current = State.INIT_U_TURN;
+                current_state = State.INIT_U_TURN;
             }
         }
 
@@ -327,7 +318,7 @@ public class iSecondPass implements Phase {
                 } else {
                     duringInitialUturn = false;
                     okToEchoFoward = true;
-                    current = State.ECHO;
+                    this.hasInitUTurned = true;
                     map.updatePos();
                     return droneController.fly();
                 }
@@ -344,7 +335,7 @@ public class iSecondPass implements Phase {
                 }
                 okToEchoFoward = true;
                 duringInitialUturn = false;
-                current = State.ECHO;
+                this.hasInitUTurned = true;
                 return droneController.turn(directionToTurn);
             default:
                 return null;
@@ -396,7 +387,7 @@ public class iSecondPass implements Phase {
 
                 return droneController.turn(directionToTurn);
             case 4:
-                current = State.SCAN;
+                current_state = State.SCAN;
                 turnStage = -1;
                 hasUturned = true;
                 canClearGround = false;
@@ -407,4 +398,36 @@ public class iSecondPass implements Phase {
                 return null;
         }
     }
+
+    private State determineNextState() {
+        switch(this.current_state) {
+            case ECHO:
+                return State.FLY;
+            case SCAN:
+                return State.ECHO;
+            case FLY:
+                return State.SCAN;
+            case INIT_U_TURN:
+                if (this.hasInitUTurned) {
+                    return State.ECHO;
+                }
+                return State.INIT_U_TURN;
+            case U_TURN:
+                if (this.hasUturned) {
+                    return State.SCAN;
+                }
+                return State.U_TURN;
+            case FLY2:
+                if (groundDis == -1) {
+                    return State.SCAN;
+                }
+                return State.FLY2;
+            default:
+                return null;
+
+        }
+
+    }
+
+    
 }

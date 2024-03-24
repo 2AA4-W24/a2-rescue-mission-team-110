@@ -33,7 +33,7 @@ public class iFirstPass implements Phase {
     private DefaultJSONResponseParser parser;
 
 
-    private State current_state = State.SCAN;
+    private State current_state;
     private int turnStage = -1;
 
     private boolean isOutOfRange = false;
@@ -55,6 +55,8 @@ public class iFirstPass implements Phase {
         this.map = map;
         this.battery = battery;
         this.parser = parser;
+        
+        this.current_state = State.SCAN;
     }
 
     private enum State {
