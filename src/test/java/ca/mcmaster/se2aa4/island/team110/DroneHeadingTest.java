@@ -9,58 +9,66 @@ public class DroneHeadingTest {
 
     @Test
     void testTurnFromNorthToEast() {
+        DroneHeading expectedHeading = DroneHeading.EAST;
         DroneHeading droneHeading = DroneHeading.NORTH;
-        DroneHeading newHeading = droneHeading.turn("RIGHT");
-        assertEquals(DroneHeading.EAST, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("RIGHT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromNorthToWest() {
+        DroneHeading expectedHeading = DroneHeading.WEST;
         DroneHeading droneHeading = DroneHeading.NORTH;
-        DroneHeading newHeading = droneHeading.turn("LEFT");
-        assertEquals(DroneHeading.WEST, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("LEFT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromEastToNorth() {
+        DroneHeading expectedHeading = DroneHeading.NORTH;
         DroneHeading droneHeading = DroneHeading.EAST;
-        DroneHeading newHeading = droneHeading.turn("LEFT");
-        assertEquals(DroneHeading.NORTH, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("LEFT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromEastToSouth() {
+        DroneHeading expectedHeading = DroneHeading.SOUTH;
         DroneHeading droneHeading = DroneHeading.EAST;
-        DroneHeading newHeading = droneHeading.turn("RIGHT");
-        assertEquals(DroneHeading.SOUTH, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("RIGHT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromSouthToEast() {
+        DroneHeading expectedHeading = DroneHeading.EAST;
         DroneHeading droneHeading = DroneHeading.SOUTH;
-        DroneHeading newHeading = droneHeading.turn("LEFT");
-        assertEquals(DroneHeading.EAST, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("LEFT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromSouthToWest() {
+        DroneHeading expectedHeading = DroneHeading.WEST;
         DroneHeading droneHeading = DroneHeading.SOUTH;
-        DroneHeading newHeading = droneHeading.turn("RIGHT");
-        assertEquals(DroneHeading.WEST, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("RIGHT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromWestToNorth() {
+        DroneHeading expectedHeading = DroneHeading.NORTH;
         DroneHeading droneHeading = DroneHeading.WEST;
-        DroneHeading newHeading = droneHeading.turn("RIGHT");
-        assertEquals(DroneHeading.NORTH, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("RIGHT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
     @Test
     void testTurnFromWestToSouth() {
+        DroneHeading expectedHeading = DroneHeading.SOUTH;
         DroneHeading droneHeading = DroneHeading.WEST;
-        DroneHeading newHeading = droneHeading.turn("LEFT");
-        assertEquals(DroneHeading.SOUTH, newHeading);
+        DroneHeading actualHeading = droneHeading.turn("LEFT");
+        assertEquals(expectedHeading, actualHeading);
     }
 
 }

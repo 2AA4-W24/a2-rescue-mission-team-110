@@ -103,9 +103,7 @@ public class FindGround implements Phase {
         }
 
         return new MoveToGround(this.map, this.battery, this.parser, this.special_case);
-    }
-
-
+   
     @Override
     public void updateState(JSONObject response) {
 

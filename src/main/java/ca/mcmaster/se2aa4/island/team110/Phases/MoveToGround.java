@@ -85,7 +85,6 @@ public class MoveToGround implements Phase {
         
     }
 
-    @Override
     public void updateState(JSONObject response) {
 
         int cost = this.parser.getCost(response);
