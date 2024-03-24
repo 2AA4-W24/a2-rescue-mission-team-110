@@ -114,11 +114,6 @@ public class FindGround implements Phase {
 
         boolean groundFound = this.parser.echoFound(response);
         if (groundFound) {
-            Point pos = map.getCurrentPosition();
-            int current_x = pos.x();
-            int current_y = pos.y();
-            logger.info("y: {}", current_x);
-            logger.info("x: {}", current_y);
             this.current_state = State.TURN_TO_GROUND;
         }
 

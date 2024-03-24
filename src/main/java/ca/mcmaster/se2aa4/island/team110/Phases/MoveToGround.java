@@ -64,6 +64,7 @@ public class MoveToGround implements Phase {
                 String echo_direction = determineEcho();
                 return droneRadar.echo(echo_direction);
             case FLY:
+                this.map.updatePos();
                 this.range--;
                 return droneController.fly();
             default:
@@ -89,7 +90,7 @@ public class MoveToGround implements Phase {
             this.range = this.parser.echoRange(response);
         }
      
-        if (range == 0) {
+        if (range == 1) {
 
             this.reachedGround = true;
         } 
@@ -125,11 +126,9 @@ public class MoveToGround implements Phase {
             case ECHO:
                 return State.FLY;
             case FLY:
-                this.map.updatePos();
                 return State.FLY;
             default: 
-                this.map.updatePos();
-                return State.FLY;
+                return null;
       
         }
 
