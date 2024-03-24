@@ -50,7 +50,7 @@ public class iFirstPass implements Phase {
     private String uturnechohere;
     private boolean goHome = false;
 
-    private int batteryThreshold = 500;
+    private int batteryThreshold = 300;
 
     public iFirstPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {
         this.map = map;

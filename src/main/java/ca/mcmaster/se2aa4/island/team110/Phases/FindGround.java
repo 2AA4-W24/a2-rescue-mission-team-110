@@ -38,7 +38,7 @@ public class FindGround implements Phase {
 
     private boolean special_case = false; //Case for if echoing forward in the beginning detects ground
 
-    private int batteryThreshold = 500;
+    private int batteryThreshold = 300;
 
     public FindGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;

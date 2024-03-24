@@ -53,7 +53,7 @@ public class iSecondPass implements Phase {
 
     private boolean goHome = false;
 
-    private int batteryThreshold = 500;
+    private int batteryThreshold = 300;
 
     public iSecondPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;

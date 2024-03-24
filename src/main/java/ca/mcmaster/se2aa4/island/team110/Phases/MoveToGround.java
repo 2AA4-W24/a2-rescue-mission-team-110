@@ -36,7 +36,7 @@ public class MoveToGround implements Phase {
     private boolean goHome = false;
     private boolean reachedGroundSpecial = false;
     private boolean special_case;
-    private int batteryThreshold = 500;
+    private int batteryThreshold = 300;
 
 
     public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {

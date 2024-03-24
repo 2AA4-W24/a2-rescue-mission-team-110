@@ -50,13 +50,11 @@ public class ReturnHome implements Phase {
 
         if (current_position.x() > 1) {
             if (current_heading == DroneHeading.WEST) {
-                logger.info("Hi ");
                 map.updatePos();
                 
                 return droneController.fly();
             }
             else {
-                logger.info("Hi 2");
                 heading_to_turn = determineTurnDirection(DroneHeading.WEST);
                 return droneController.turn(heading_to_turn);
             }
@@ -103,7 +101,6 @@ public class ReturnHome implements Phase {
         String heading_to_turn = "";
 
         if (current_heading == DroneHeading.EAST) {
-            logger.info("Hello");
             
             switch(target_heading) {
                 case NORTH:
@@ -125,7 +122,6 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.NORTH) {
-            logger.info("Hola");
             
             switch(target_heading) {
                 case NORTH:
@@ -147,20 +143,16 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.WEST) {
-            logger.info("Ni hao");
             switch(target_heading) {
                 case NORTH:
-                    logger.info("in North");
                     map.updatePosTurn("RIGHT");
                     heading_to_turn = "N";
                     break;
                 case SOUTH:
-                    logger.info("in South");
                     map.updatePosTurn("LEFT");
                     heading_to_turn = "S";
                     break;
                 case EAST:
-                    logger.info("in East");
                     map.updatePosTurn("RIGHT");
                     heading_to_turn = "N";
                     break;
@@ -171,7 +163,6 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.SOUTH) {
-            logger.info("xin chao");
             switch(target_heading) {
                 case NORTH:
                     map.updatePosTurn("RIGHT");
