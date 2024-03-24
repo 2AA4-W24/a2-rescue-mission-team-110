@@ -351,7 +351,6 @@ public class iSecondPass implements Phase {
         }
     }
 
-
     private String makeUTurn() {
         switch (turnStage) {
             case -1:
