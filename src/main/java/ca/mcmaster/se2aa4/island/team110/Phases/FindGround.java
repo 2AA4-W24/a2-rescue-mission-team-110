@@ -45,11 +45,10 @@ public class FindGround implements Phase {
         this.battery = battery;
         this.parser = parser;
 
-        this.current_state = State.CHECK_FRONT;
+        this.current_state = State.FIND_GROUND;
      }
 
     
-
     @Override
     public boolean reachedEnd() {
         if (this.goHome) {
@@ -73,10 +72,6 @@ public class FindGround implements Phase {
         // }
 
         switch (current_state) {
-            case CHECK_FRONT:
-                String initialEchoDirection = determineInitialEcho();
-                return droneRadar.echo(initialEchoDirection);
-                
             case FIND_GROUND:
                 String nextEchoDirection = getAndAlternateEchoDirection();
                 return droneRadar.echo(nextEchoDirection);
@@ -105,23 +100,25 @@ public class FindGround implements Phase {
             return new ReturnHome(this.map, this.battery);
         }
 
-        return new MoveToGround(this.map, this.battery, this.parser, this.special_case);
+        return new MoveToGround(this.map, this.battery, this.parser);
     }
    
     @Override
     public void updateState(JSONObject response) {
 
         int cost = this.parser.getCost(response);
+        logger.info("cost {}", cost);
         this.battery.updateBatteryLevel(cost);
+        logger.info("new cost {}", battery.getBatteryLevel());
 
 
         boolean groundFound = this.parser.echoFound(response);
-
-        if (groundFound && this.current_state == State.CHECK_FRONT) {
-            this.special_case = true;
-            this.current_state = null;
-        }
-        else if (groundFound) {
+        if (groundFound) {
+            Point pos = map.getCurrentPosition();
+            int current_x = pos.x();
+            int current_y = pos.y();
+            logger.info("y: {}", current_x);
+            logger.info("x: {}", current_y);
             this.current_state = State.TURN_TO_GROUND;
         }
 

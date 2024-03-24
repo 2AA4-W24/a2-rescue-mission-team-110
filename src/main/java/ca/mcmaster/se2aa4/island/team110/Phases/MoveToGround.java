@@ -9,6 +9,7 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
+import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
@@ -35,15 +36,13 @@ public class MoveToGround implements Phase {
     private boolean reachedGround = false;
     private boolean goHome = false;
     private boolean reachedGroundSpecial = false;
-    private boolean special_case;
     private int batteryThreshold = 300;
 
 
-    public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {
+    public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
         this.parser = parser;
-        this.special_case = special_case;
 
         this.current_state = State.ECHO;
         
@@ -55,9 +54,6 @@ public class MoveToGround implements Phase {
             return goHome;
         }
 
-        if(this.reachedGroundSpecial) {
-            return this.reachedGroundSpecial;
-        }
         return this.reachedGround;
     }
 
@@ -80,8 +76,7 @@ public class MoveToGround implements Phase {
         if (this.goHome) {
             return new ReturnHome(this.map, this.battery);
         }
-
-        return new iFirstPass(this.map, this.battery, this.parser, this.special_case);
+        return new iFirstPass(this.map, this.battery, this.parser);
         
     }
 
@@ -93,23 +88,15 @@ public class MoveToGround implements Phase {
         if (this.parser.echoRange(response) != Integer.MAX_VALUE) {
             this.range = this.parser.echoRange(response);
         }
+     
+        if (range == 0) {
 
-        if (this.special_case) {
-            if (range == 1) {
-                this.reachedGroundSpecial = true;
-            }
-            else {
-                this.current_state = determineNextState();
-            }
-        }
+            this.reachedGround = true;
+        } 
         else {
-            if (range == 0) {
-                this.reachedGround = true;
-            } 
-            else {
-                this.current_state = determineNextState();
-            }
+            this.current_state = determineNextState();
         }
+        
         if (this.battery.getBatteryLevel() < this.batteryThreshold) {
             this.goHome = true;
         }

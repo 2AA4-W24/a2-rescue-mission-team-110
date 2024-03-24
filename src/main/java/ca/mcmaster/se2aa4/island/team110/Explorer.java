@@ -33,15 +33,14 @@ public class Explorer implements IExplorerRaid {
         String direction = info.getString("heading");
         Integer batteryLevel = info.getInt("budget");
 
-
         //Initialize necessary modules
-        DroneHeading heading = DroneHeading.getHeading(direction);
-        RelativeMap map = new RelativeMap(heading);
-        Battery battery = new Battery(batteryLevel);
+        droneHeading = DroneHeading.getHeading(direction);
+        relativeMap = new RelativeMap(droneHeading);
+        battery = new Battery(batteryLevel);
         DefaultJSONResponseParser parser = new DefaultJSONResponseParser();
 
         //Initialize current phase
-        this.current_phase = new FindGround(map, battery, parser);
+        this.current_phase = new FindGround(relativeMap, battery, parser);
 
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
@@ -86,7 +85,6 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String deliverFinalReport() {
         String closestCreek = relativeMap.getClosestCreekId();
-        logger.info("Successfully returned back to base");
         logger.info("The closest creek to the emergency site is: {}", closestCreek);
         return closestCreek;
     }

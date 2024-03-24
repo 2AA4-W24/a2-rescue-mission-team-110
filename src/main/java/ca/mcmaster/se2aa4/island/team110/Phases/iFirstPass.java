@@ -13,6 +13,7 @@ import ca.mcmaster.se2aa4.island.team110.TileType;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
+import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,11 +53,10 @@ public class iFirstPass implements Phase {
 
     private int batteryThreshold = 300;
 
-    public iFirstPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser, boolean special_case) {
+    public iFirstPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
         this.parser = parser;
-        this.special_case = special_case;
     }
 
     private enum State {

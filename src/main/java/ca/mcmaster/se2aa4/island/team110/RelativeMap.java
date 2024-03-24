@@ -14,7 +14,7 @@ public class RelativeMap {
 
     private final Logger logger = LogManager.getLogger();
     private Map<Point, TileType> relative_map;
-    private Map<Point, String> creek_database;
+    public Map<Point, String> creek_database;
     Point current_position;
     DroneHeading current_heading;
 
@@ -26,6 +26,12 @@ public class RelativeMap {
         this.current_heading = initial_heading;
         relative_map.put(new Point(0, 0), TileType.UNKNOWN);
 
+    }
+
+    public void printCreekIDs() {
+        for (String value : creek_database.values()) {
+            logger.info("{}",value);
+        }
     }
 
     public void updatePos() {
