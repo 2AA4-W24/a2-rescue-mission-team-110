@@ -1,12 +1,12 @@
-package ca.mcmaster.se2aa4.island.team110;
+// package ca.mcmaster.se2aa4.island.team110;
 
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+// import org.json.JSONObject;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import static org.junit.jupiter.api.Assertions.*;
 
-import ca.mcmaster.se2aa4.island.team110.Phases.FindGround;
-import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+// import ca.mcmaster.se2aa4.island.team110.Phases.FindGround;
+// import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 public class FindGroundTest {
     private FindGround findGround;
@@ -100,7 +100,3 @@ public class FindGroundTest {
         boolean decision_two = decision.contains("heading");
         assertTrue(decision_one || decision_two);
     }
-
-
-
-}

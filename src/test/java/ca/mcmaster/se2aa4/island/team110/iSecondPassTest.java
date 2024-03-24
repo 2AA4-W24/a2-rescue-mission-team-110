@@ -79,4 +79,4 @@ private TestableRelativeMap map;
         String decision = secondPass.getNextDecision();
         assertEquals("heading",new JSONObject(decision).getString("action") );
     }
-    }
+}
