@@ -198,6 +198,10 @@ public class ReturnHome implements Phase {
     }
 
     public void updateState(JSONObject response) {
+        Point current_position = map.getCurrentPosition();
+        if (current_position.x() == 0 && current_position.y() == 0){
+            this.isHome = true;
+        }
         
     }
 
