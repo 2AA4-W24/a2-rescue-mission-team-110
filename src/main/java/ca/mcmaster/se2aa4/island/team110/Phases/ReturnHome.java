@@ -8,6 +8,7 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,19 +42,18 @@ public class ReturnHome implements Phase {
         DroneHeading current_heading = map.getCurrentHeading();
         String heading_to_turn = "";
 
-        if (this.isHome) {
+        if (current_position.x() == 0 && current_position.y() == 0){
+            this.isHome = true;
             return droneController.stop();
         }
 
         if (current_position.x() > 1) {
             if (current_heading == DroneHeading.WEST) {
-                logger.info("Hi ");
                 map.updatePos();
                 
                 return droneController.fly();
             }
             else {
-                logger.info("Hi 2");
                 heading_to_turn = determineTurnDirection(DroneHeading.WEST);
                 return droneController.turn(heading_to_turn);
             }
@@ -100,7 +100,6 @@ public class ReturnHome implements Phase {
         String heading_to_turn = "";
 
         if (current_heading == DroneHeading.EAST) {
-            logger.info("Hello");
             
             switch(target_heading) {
                 case NORTH:
@@ -122,7 +121,6 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.NORTH) {
-            logger.info("Hola");
             
             switch(target_heading) {
                 case NORTH:
@@ -144,20 +142,16 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.WEST) {
-            logger.info("Ni hao");
             switch(target_heading) {
                 case NORTH:
-                    logger.info("in North");
                     map.updatePosTurn("RIGHT");
                     heading_to_turn = "N";
                     break;
                 case SOUTH:
-                    logger.info("in South");
                     map.updatePosTurn("LEFT");
                     heading_to_turn = "S";
                     break;
                 case EAST:
-                    logger.info("in East");
                     map.updatePosTurn("RIGHT");
                     heading_to_turn = "N";
                     break;
@@ -168,7 +162,6 @@ public class ReturnHome implements Phase {
         }
 
         else if (current_heading == DroneHeading.SOUTH) {
-            logger.info("xin chao");
             switch(target_heading) {
                 case NORTH:
                     map.updatePosTurn("RIGHT");
@@ -196,12 +189,12 @@ public class ReturnHome implements Phase {
         return null;
     }
 
-    @Override
     public void updateState(JSONObject response) {
         Point current_position = map.getCurrentPosition();
         if (current_position.x() == 0 && current_position.y() == 0){
             this.isHome = true;
         }
+        
     }
 
     public boolean isFinal() {
