@@ -131,6 +131,8 @@ public class iFirstPass implements Phase {
         this.battery.updateBatteryLevel(cost);
 
 
+       // this.current_state = determineNextState();
+
         if (this.parser.scanTile(response) != null) {
             TileType tile = this.parser.scanTile(response);
             map.addTile(tile);
