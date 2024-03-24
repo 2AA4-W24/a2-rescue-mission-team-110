@@ -25,4 +25,24 @@ public class DroneController implements Controller {
         decision.put("action", "stop");
         return decision.toString();
     }
+
+    @Override
+    public String land(String creekId, int crew) {
+        JSONObject decision = new JSONObject();
+        JSONObject parameters = new JSONObject();
+        parameters.put("creek", creekId);
+        parameters.put("people", crew);
+        decision.put("action", "land");
+        decision.put("parameters", parameters);
+        
+        return decision.toString();
+    }
+
+    @Override
+    public String move_to(String direction) {
+        JSONObject decision = new JSONObject();
+        decision.put("action", "move_to");
+        decision.put("parameters", new JSONObject().put("direction", direction)); 
+        return decision.toString();
+    }
 }

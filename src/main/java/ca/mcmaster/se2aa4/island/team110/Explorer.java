@@ -13,6 +13,8 @@ import org.json.JSONTokener;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.Phases.FindGround;
+import ca.mcmaster.se2aa4.island.team110.Phases.EmergencySite;
+
 
 public class Explorer implements IExplorerRaid {
 
@@ -21,6 +23,7 @@ public class Explorer implements IExplorerRaid {
     private DroneHeading droneHeading;
     private RelativeMap relativeMap;
     private Phase current_phase;
+    
 
     @Override
     public void initialize(String s) {
@@ -34,10 +37,15 @@ public class Explorer implements IExplorerRaid {
 
         this.current_phase = new FindGround(relativeMap);
 
+
         Integer batteryLevel = info.getInt("budget");
+        
+
+        
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
     }
+
 
     @Override
     public String takeDecision() {

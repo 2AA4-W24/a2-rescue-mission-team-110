@@ -10,8 +10,8 @@ import ca.mcmaster.se2aa4.island.team110.Phases.iSecondPass;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 public class iSecondPassTest {
-private iSecondPass secondPass;
-private TestableRelativeMap map;
+    private iSecondPass secondPass;
+    private TestableRelativeMap map;
 
     @BeforeEach
     void setUp() {
@@ -79,4 +79,4 @@ private TestableRelativeMap map;
         String decision = secondPass.getNextDecision();
         assertEquals("heading",new JSONObject(decision).getString("action") );
     }
-    }
+}

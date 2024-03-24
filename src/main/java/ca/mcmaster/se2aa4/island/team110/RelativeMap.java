@@ -63,6 +63,24 @@ public class RelativeMap {
 
     }
 
+    public Point getEmergencySiteLocation() {
+        for (Map.Entry<Point, TileType> entry : relative_map.entrySet()) {
+            if (entry.getValue() == TileType.EMERGENCY_SITE) {
+                return entry.getKey(); 
+            }
+        }
+        return null; 
+    }
+
+    public Point getClosestCreekPosition() {
+        return getClosestCreek(); 
+    }
+    public void setCurrentPosition(int x, int y) {
+        this.current_position = new Point(x, y);
+        logger.info("Current position updated to x: " + x + " y: " + y);
+    }
+    
+
     private Point getClosestCreek() {
         Point closest_creek = null;
         double closest_distance = Double.MAX_VALUE;
