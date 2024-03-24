@@ -313,7 +313,7 @@ public class iSecondPass implements Phase {
     @Override
     public Phase getNextPhase() {
         logger.info("Second pass ended");
-        return null;
+        return new ReturnHome(this.map);
     }
 
     @Override
