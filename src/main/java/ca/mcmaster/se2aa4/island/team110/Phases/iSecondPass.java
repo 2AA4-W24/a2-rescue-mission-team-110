@@ -12,6 +12,7 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
+import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 
@@ -29,6 +30,7 @@ public class iSecondPass implements Phase {
 
     private RelativeMap map;
     private Battery battery;
+    private DefaultJSONResponseParser parser;
 
     private State current = State.INIT_U_TURN;
     private int initTurnStage = 0;
@@ -51,9 +53,10 @@ public class iSecondPass implements Phase {
 
     private boolean goHome = false;
 
-    public iSecondPass(RelativeMap map, Battery battery) {
+    public iSecondPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
+        this.parser = parser;
 
     }
 

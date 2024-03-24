@@ -47,42 +47,7 @@ public class FindGround implements Phase {
         this.current_state = State.CHECK_FRONT;
      }
 
-    private String determineInitialEcho() {
-        DroneHeading initialHeading = map.getCurrentHeading();
-        switch(initialHeading) {
-            case NORTH:
-                return "N";
-            case SOUTH:
-                return "S";
-            case EAST:
-                return "E";
-            case WEST:
-                return "W";
-            default:
-                return null;
-        }
-    }
-
-    private String getAndAlternateEchoDirection() {
-        String[] echoDirections;
-        if (DroneHeading.NORTH.equals(map.getCurrentHeading()) || DroneHeading.SOUTH.equals(map.getCurrentHeading())) {
-            echoDirections = new String[]{"E", "W"};
-        } 
-        else {  
-            echoDirections= new String[]{"N","S"};
-        }
-
-        
-        if (lastEchoDirection == null || !lastEchoDirection.equals(echoDirections[0])) {
-            lastEchoDirection = echoDirections[0];
-        } 
-        else {
-            lastEchoDirection= echoDirections[1];
-        }
-
-        return lastEchoDirection;
-    }
-
+    
 
     @Override
     public boolean reachedEnd() {
@@ -133,18 +98,16 @@ public class FindGround implements Phase {
     @Override
     public Phase getNextPhase() {
         if (this.goHome) {
-            return new ReturnHome(map, battery);
+            return new ReturnHome(this.map, this.battery);
         }
-        else {
-            return new MoveToGround(map, battery);
-        }
-    }
 
+        return new MoveToGround(this.map, this.battery, this.parser, this.special_case);
+    }
 
 
     @Override
     public void updateState(JSONObject response) {
-        boolean groundFound = parser.echoGround(response);
+        boolean groundFound = this.parser.echoFound(response);
 
         if (groundFound && this.current_state == State.CHECK_FRONT) {
             this.special_case = true;
@@ -159,34 +122,70 @@ public class FindGround implements Phase {
         }
     }
 
-    private State determineNextState() {
-        switch (current_state) {
-            case CHECK_FRONT:
-                if (this.special_case) {
-                    return null;
-                }
-                return State.FIND_GROUND;
-                
-            case FIND_GROUND:
-                return State.FLY;
-
-            case TURN_TO_GROUND:
-                map.updatePosTurn("RIGHT");
-                return null;
-
-            case FLY:
-                map.updatePos();
-                return State.FIND_GROUND;
-
-            default:
-                map.updatePos();
-                return State.FLY;
-        }
-    }
-
-
+    
     @Override
     public boolean isFinal() {
         return false;
     }
-}
+
+    private String determineInitialEcho() {
+            DroneHeading initialHeading = map.getCurrentHeading();
+            switch(initialHeading) {
+                case NORTH:
+                    return "N";
+                case SOUTH:
+                    return "S";
+                case EAST:
+                    return "E";
+                case WEST:
+                    return "W";
+                default:
+                    return null;
+            }
+        }
+
+        private String getAndAlternateEchoDirection() {
+            String[] echoDirections;
+            if (DroneHeading.NORTH.equals(map.getCurrentHeading()) || DroneHeading.SOUTH.equals(map.getCurrentHeading())) {
+                echoDirections = new String[]{"E", "W"};
+            } 
+            else {  
+                echoDirections= new String[]{"N","S"};
+            }
+
+            
+            if (lastEchoDirection == null || !lastEchoDirection.equals(echoDirections[0])) {
+                lastEchoDirection = echoDirections[0];
+            } 
+            else {
+                lastEchoDirection= echoDirections[1];
+            }
+
+            return lastEchoDirection;
+        }
+
+        private State determineNextState() {
+            switch (this.current_state) {
+                case CHECK_FRONT:
+                    if (this.special_case) {
+                        return null;
+                    }
+                    return State.FIND_GROUND;
+                    
+                case FIND_GROUND:
+                    return State.FLY;
+
+                case TURN_TO_GROUND:
+                    map.updatePosTurn("RIGHT");
+                    return null;
+
+                case FLY:
+                    map.updatePos();
+                    return State.FIND_GROUND;
+
+                default:
+                    map.updatePos();
+                    return State.FLY;
+            }
+        }
+    }

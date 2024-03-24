@@ -10,19 +10,21 @@ import ca.mcmaster.se2aa4.island.team110.Interfaces.JSONResponseParser;
 public class DefaultJSONResponseParser implements JSONResponseParser{
     private final Logger logger = LogManager.getLogger();
 
-    public boolean echoGround(JSONObject response) { //returns a boolean depending on if ground is found through an echo
+    public boolean echoFound(JSONObject response) { //returns a boolean depending on if ground is found through an echo
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras.has("found")) {
                 if ("GROUND".equals(extras.getString("found"))) {
                     return true;
                 }
+                else {
+                    return false;
+                }
             }
 
         }
 
         return false;
-
     }
 
     public int echoRange(JSONObject response) { //returns the range of the echo
@@ -57,8 +59,32 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                     // map.addTile(TileType.EMERGENCY_SITE);
                 }
             }
+            
         }
         return TileType.UNKNOWN;
+
+    }
+
+    public JSONArray getID(JSONObject response) {
+        if (response.has("extras")) {
+            JSONObject extras = response.getJSONObject("extras");
+            if (extras.has("creeks")) {
+                JSONArray creeks = extras.getJSONArray("creeks");
+                if (!creeks.isEmpty()) {
+                    return creeks;
+                    // map.addTile(TileType.CREEK);
+                    // map.addCreekID(creeks.getString(0));
+                }
+            }
+            // if (extras.has("sites")) {
+            //     JSONArray emergency_site = extras.getJSONArray("sites");
+            //     if (!emergency_site.isEmpty()) {
+            //         return emergency_site;
+            //         // map.addTile(TileType.EMERGENCY_SITE);
+            //     }
+            // }
+        }
+        return null;
 
     }
 
