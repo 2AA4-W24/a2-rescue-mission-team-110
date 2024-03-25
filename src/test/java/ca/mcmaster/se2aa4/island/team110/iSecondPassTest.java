@@ -17,6 +17,7 @@ public class iSecondPassTest {
     private Battery battery;
     private DefaultJSONResponseParser parser;
 
+
     @BeforeEach
     void setUp() {
         map = new TestableRelativeMap(DroneHeading.NORTH);
@@ -85,7 +86,6 @@ public class iSecondPassTest {
         String decision = secondPass.getNextDecision();
         assertEquals("heading",new JSONObject(decision).getString("action") );
     }
-    
 
     @Test
     void testBatteryThresholdForReturn() {

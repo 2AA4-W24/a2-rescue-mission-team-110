@@ -13,8 +13,10 @@ import org.json.JSONTokener;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.Phases.FindGround;
+import ca.mcmaster.se2aa4.island.team110.Phases.EmergencySite;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
+
 
 public class Explorer implements IExplorerRaid {
 
@@ -24,6 +26,7 @@ public class Explorer implements IExplorerRaid {
     private RelativeMap relativeMap;
     private Battery battery;
     private Phase current_phase;
+    
 
     @Override
     public void initialize(String s) {
@@ -45,6 +48,7 @@ public class Explorer implements IExplorerRaid {
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
     }
+
 
     @Override
     public String takeDecision() {

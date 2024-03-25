@@ -58,7 +58,7 @@ public class ReturnHome implements Phase {
         Point current_position = map.getCurrentPosition();
         DroneHeading current_heading = map.getCurrentHeading();
         String heading_to_turn = "";
-
+        
         int x = current_position.x();
         int y = current_position.y();
         logger.info("x {}", x);
@@ -348,7 +348,7 @@ public class ReturnHome implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return null;
+        return new EmergencySite(this.map);
     }
 
     public void updateState(JSONObject response) {
@@ -367,7 +367,7 @@ public class ReturnHome implements Phase {
     }
 
     public boolean isFinal() {
-        return true;
+        return false;
     }
 
 }

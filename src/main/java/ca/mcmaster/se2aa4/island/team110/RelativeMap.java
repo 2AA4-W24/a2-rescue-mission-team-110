@@ -49,14 +49,17 @@ public class RelativeMap {
                 this.current_position = new Point(this.current_position.x() - 1, this.current_position.y());
                 break;
         }
-        
     }
 
     public void updatePosTurn(String direction) {
         updatePos();
         this.current_heading = this.current_heading.turn(direction);
         updatePos();
-        
+    }
+
+    public void updatePosMoveTo(DroneHeading direction){
+        this.current_heading = direction;
+        updatePos();
     }
 
     public void addTile(TileType tileType){
@@ -68,6 +71,24 @@ public class RelativeMap {
         creek_database.put(this.current_position, creekID);
 
     }
+
+    public Point getEmergencySiteLocation() {
+        for (Map.Entry<Point, TileType> entry : relative_map.entrySet()) {
+            if (entry.getValue() == TileType.EMERGENCY_SITE) {
+                return entry.getKey(); 
+            }
+        }
+        return null; 
+    }
+
+    public Point getClosestCreekPosition() {
+        return getClosestCreek(); 
+    }
+    public void setCurrentPosition(int x, int y) {
+        this.current_position = new Point(x, y);
+        logger.info("Current position updated to x: " + x + " y: " + y);
+    }
+    
 
     private Point getClosestCreek() {
         Point closest_creek = null;

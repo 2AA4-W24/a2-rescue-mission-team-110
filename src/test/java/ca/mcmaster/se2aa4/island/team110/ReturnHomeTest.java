@@ -21,15 +21,7 @@ public class ReturnHomeTest {
         returnHome = new ReturnHome(map, battery);
     }
 
-    @Test
-    void testImmediateStopWhenAtHome() {
-        map.setCurrentPosition(new Point(0, 0));
-        
-        String decision = returnHome.getNextDecision();
-        String expectedAction = "stop";
-        String actualAction = new JSONObject(decision).getString("action");
-        assertEquals(expectedAction, actualAction);
-    }
+    
 
     @Test
     void testDecisionToFlyWhenFacingCorrectDirection() {

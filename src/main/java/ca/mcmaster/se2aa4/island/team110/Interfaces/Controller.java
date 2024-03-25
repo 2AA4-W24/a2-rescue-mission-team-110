@@ -4,4 +4,7 @@ public interface Controller {
     String fly();
     String turn(String direction);
     String stop();
+    String move_to(String direction);
+    String land(String creekId, int crew);
+
 }
