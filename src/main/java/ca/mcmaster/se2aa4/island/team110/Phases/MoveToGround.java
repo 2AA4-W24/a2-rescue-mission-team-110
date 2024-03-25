@@ -19,10 +19,11 @@ import org.apache.logging.log4j.Logger;
 public class MoveToGround implements Phase {
     private final Logger logger = LogManager.getLogger();
 
-    private enum State {
+    private enum State { //States for this phase
         FLY, ECHO;
     }
 
+    //Initialize necessary modules and variables
     private DroneController droneController = new DroneController();
     private DroneRadar droneRadar = new DroneRadar();
 
@@ -35,10 +36,9 @@ public class MoveToGround implements Phase {
 
     private boolean reachedGround = false;
     private boolean goHome = false;
-    private boolean reachedGroundSpecial = false;
     private int batteryThreshold = 300;
 
-
+    //Constructor
     public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
@@ -50,16 +50,16 @@ public class MoveToGround implements Phase {
 
     @Override
     public boolean reachedEnd() {
-        if (this.goHome) {
+        if (this.goHome) { //Insufficient budget
             return goHome;
         }
 
-        return this.reachedGround;
+        return this.reachedGround; //Completed phase
     }
 
     @Override
     public String getNextDecision() {
-        switch (current_state) {
+        switch (this.current_state) {
             case ECHO:
                 String echo_direction = determineEcho();
                 return droneRadar.echo(echo_direction);

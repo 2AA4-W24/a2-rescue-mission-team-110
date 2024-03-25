@@ -42,7 +42,7 @@ public enum DroneHeading {
         }
   }
 
-    public DroneHeading turnLeft() { 
+    private DroneHeading turnLeft() { 
         switch(this) {
           case NORTH:
             return WEST;
@@ -57,7 +57,7 @@ public enum DroneHeading {
         }
   }
 
-    public DroneHeading turnRight() {
+    private DroneHeading turnRight() {
         switch(this) {
           case NORTH:
             return EAST;

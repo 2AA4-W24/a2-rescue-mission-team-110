@@ -36,10 +36,9 @@ public class FindGround implements Phase {
     private boolean turnCompleted = false;
     private boolean goHome = false;
 
-    private boolean special_case = false; //Case for if echoing forward in the beginning detects ground
-
     private int batteryThreshold = 300;
 
+    //Constructor 
     public FindGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
@@ -50,40 +49,28 @@ public class FindGround implements Phase {
 
     
     @Override
-    public boolean reachedEnd() {
-        if (this.goHome) {
+    public boolean reachedEnd() { //Conditions to determine when we reached the end of the phase
+        if (this.goHome) { //Condition 1: Insufficient budget to keep progressing
             return this.goHome;
         }
 
-        if (this.special_case) {
-            return this.special_case;
-        }
-
-        return this.turnCompleted;
+        return this.turnCompleted; //Condition 2: Completed the turn to move onto the MoveToGround
     }
 
 
     @Override
-    public String getNextDecision() {
-
-       
-
-        switch (current_state) {
-            case FIND_GROUND:
+    public String getNextDecision() { //Getting the next decision in the phase
+        switch (current_state) { //Dependent on the current_state
+            case FIND_GROUND: //Finding Ground
                 String nextEchoDirection = getAndAlternateEchoDirection();
                 return droneRadar.echo(nextEchoDirection);
-
-            case TURN_TO_GROUND:
-                map.updatePosTurn("RIGHT");
+            case TURN_TO_GROUND: //Turning to Ground
+                map.updatePosTurn("RIGHT"); 
                 turnCompleted = true;
-                DroneHeading direction = map.getCurrentHeading();
-                logger.info("The direction of the drone is {}", direction);
                 return droneController.turn(lastEchoDirection);
-
-            case FLY:
+            case FLY: //Fly forward 
                 map.updatePos();
                 return droneController.fly();
-
             default:
                 map.updatePos();
                 return droneController.fly();
@@ -92,32 +79,31 @@ public class FindGround implements Phase {
 
 
     @Override
-    public Phase getNextPhase() {
-        if (this.goHome) {
+    public Phase getNextPhase() { //Conditons to get next phase
+        if (this.goHome) { //If the drone has has insufficient budget to keep progressing, just go home
             return new ReturnHome(this.map, this.battery);
         }
 
-        return new MoveToGround(this.map, this.battery, this.parser);
+        return new MoveToGround(this.map, this.battery, this.parser); //Completed phase will move on to MoveToGround
     }
    
     @Override
-    public void updateState(JSONObject response) {
+    public void updateState(JSONObject response) { //Updating the state based on previous decision outcomes
 
+        //Updating battery tracker
         int cost = this.parser.getCost(response);
-        logger.info("cost {}", cost);
         this.battery.updateBatteryLevel(cost);
-        logger.info("new cost {}", battery.getBatteryLevel());
 
-
-        boolean groundFound = this.parser.echoFound(response);
-        if (groundFound) {
+        //Checks if the previous echo found ground
+        boolean groundFound = this.parser.echoFound(response); 
+        if (groundFound) { //If the drone has found ground, it will proceed to go to it
             this.current_state = State.TURN_TO_GROUND;
         }
-
-        else {
+        else { 
             this.current_state = determineNextState();
         }
 
+        //Checks if the drone doesn't have enough battery to keep going
         if (this.battery.getBatteryLevel() < this.batteryThreshold) {
             this.goHome = true;
         }
@@ -125,27 +111,11 @@ public class FindGround implements Phase {
 
     
     @Override
-    public boolean isFinal() {
+    public boolean isFinal() { //Boolean to determine if this phase is the final phase
         return false;
     }
 
-    private String determineInitialEcho() {
-        DroneHeading initialHeading = map.getCurrentHeading();
-        switch(initialHeading) {
-            case NORTH:
-                return "N";
-            case SOUTH:
-                return "S";
-            case EAST:
-                return "E";
-            case WEST:
-                return "W";
-            default:
-                return null;
-        }
-    }
-
-    private String getAndAlternateEchoDirection() {
+    private String getAndAlternateEchoDirection() { //Alternating echo scans
         String[] echoDirections;
         if (DroneHeading.NORTH.equals(map.getCurrentHeading()) || DroneHeading.SOUTH.equals(map.getCurrentHeading())) {
             echoDirections = new String[]{"E", "W"};
@@ -165,14 +135,8 @@ public class FindGround implements Phase {
         return lastEchoDirection;
     }
 
-    private State determineNextState() {
+    private State determineNextState() { //logic to determine the next state
         switch (this.current_state) {
-            case CHECK_FRONT:
-                if (this.special_case) {
-                    return null;
-                }
-                return State.FIND_GROUND;
-                
             case FIND_GROUND:
                 return State.FLY;
 
@@ -180,7 +144,6 @@ public class FindGround implements Phase {
                 return null;
 
             case FLY:
-                
                 return State.FIND_GROUND;
 
             default:

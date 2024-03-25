@@ -1,0 +1,226 @@
+@startuml ClassDiagram
+
+package Phases {
+    Interface Phase {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+    }
+
+
+    Class FindGround {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+
+    }
+
+    Class MoveToGround {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+
+    }
+
+    Class iFirstPass {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+
+    }
+
+    Class iSecondPass {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+
+    }
+
+    class EmergencySite {
+        -RelativeMap map
+        -Battery battery
+        -DefaultJSONResponseParser parser
+        +boolean reachedEnd()
+        +String getNextDecision()
+        +Phase getNextPhase()
+        +void updateState(JSONObject response)
+        +boolean isFinal()
+
+    }
+    Interface JSONResponseParser {
+        +boolean echoFound(JSONObject response)
+        +int echoRange(JSONObject response)
+        +TileType scanTile(JSONObject response)
+        +int getCost(JSONObject response)
+    }
+
+    Class DefaultJSONResponseParser {
+        +boolean echoFound(JSONObject response)
+        +int echoRange(JSONObject response)
+        +TileType scanTile(JSONObject response)
+        +int getCost(JSONObject response)
+    }
+}
+
+
+
+
+package Information {
+    
+    enum DroneHeading {
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST;
+        + getDirection(): String
+        + getHeading(): DroneHeading
+        + turn(turnHeading: String): DroneHeading
+    }
+
+    enum TileType {
+        UNKNOWN,
+        CREEK,
+        EMERGENCY_SITE
+    }
+
+    class RelativeMap {
+        - relative_map: Map<Point, TileType>
+        - creek_database: Map<Point, String>
+        - current_position: Point
+        - current_heading: DroneHeading
+        + updatePos(): void
+        + updatePosTurn(direction: String): void
+        + updatePosMoveTo(heading: DroneHeading): void
+        + addTile(tileType: TileType): void
+        + addCreekID(creekID: String): void
+        + getClosestCreekPosition(): Point
+        + setCurrentPosition(x: int, y: int): void
+        + getClosestCreekId(): void
+        + getCurrentPosition(): Point
+        + getCurrentHeading(): DroneHeading
+    }
+
+    class Battery {
+        + updateBatteryLevel(cost: int): void
+        + getBatteryLevel(): int
+    }
+
+    struct Point {
+        -int x
+        -int y
+    }
+
+
+}
+
+
+class Runner
+
+class Explorer {
+    -DroneHeading droneheading
+    -RelativeMap relativeMap
+    -Battery battery
+    -Phase current_phase
+    +void initialize()
+    +String takeDecision()
+    +void acknowledgeResults()
+    +String deliverFinalReport()
+}
+
+
+
+package Modules {
+    Interface Controller {
+        +String fly()
+        +String turn(String direction)
+        +String stop()
+        +String move_to(String direction)
+        +String land(String creekId, int crew)
+
+    }
+
+    Interface Radar {
+        +String echo(String direction)
+
+    }
+
+    Interface Scanner {
+        +String scan()
+
+    }
+    Class DroneController {
+        +String fly()
+        +String turn(String direction)
+        +String stop()
+        +String move_to(String direction)
+        +String land(String creekId, int crew)
+
+    }
+
+    Class DroneRadar {
+        +String echo(String direction)
+
+    }
+
+    Class DroneScanner {
+        +String scan()
+
+    }
+
+}
+
+DefaultJSONResponseParser ..|> JSONResponseParser
+
+FindGround ..|> Phase
+MoveToGround ..|> Phase
+iFirstPass ..|> Phase
+iSecondPass ..|> Phase
+EmergencySite ..|> Phase
+
+Phase o--> JSONResponseParser
+Phase o--> Scanner
+Phase o--> Radar 
+Phase o--> Controller
+
+Explorer o--> Phase
+Explorer o--> RelativeMap
+Explorer o--> Battery
+
+RelativeMap --> DroneHeading
+RelativeMap --> TileType
+
+Runner *--> Explorer
+
+
+DroneController ..|> Controller
+DroneRadar ..|> Radar
+DroneScanner ..|> Scanner
+
+
+
+@enduml

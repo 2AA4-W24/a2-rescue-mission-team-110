@@ -28,11 +28,6 @@ public class RelativeMap {
 
     }
 
-    public void printCreekIDs() {
-        for (String value : creek_database.values()) {
-            logger.info("{}",value);
-        }
-    }
 
     public void updatePos() {
         switch(this.current_heading) {
@@ -57,8 +52,8 @@ public class RelativeMap {
         updatePos();
     }
 
-    public void updatePosMoveTo(DroneHeading direction){
-        this.current_heading = direction;
+    public void updatePosMoveTo(DroneHeading heading){
+        this.current_heading = heading;
         updatePos();
     }
 
