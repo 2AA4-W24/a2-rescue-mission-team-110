@@ -47,8 +47,7 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                 JSONArray creeks = extras.getJSONArray("creeks");
                 if (!creeks.isEmpty()) {
                     return TileType.CREEK;
-                    // map.addTile(TileType.CREEK);
-                    // map.addCreekID(creeks.getString(0));
+                    
                 }
             }
             else {
@@ -58,7 +57,7 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                 JSONArray emergency_site = extras.getJSONArray("sites");
                 if (!emergency_site.isEmpty()) {
                     return TileType.EMERGENCY_SITE;
-                    // map.addTile(TileType.EMERGENCY_SITE);
+                    
                 }
             }
             
@@ -74,20 +73,13 @@ public class DefaultJSONResponseParser implements JSONResponseParser{
                 JSONArray creeks = extras.getJSONArray("creeks");
                 if (!creeks.isEmpty()) {
                     return creeks;
-                    // map.addTile(TileType.CREEK);
-                    // map.addCreekID(creeks.getString(0));
+                    
                 }
                 else {
                     return null;
                 }
             }
-            // if (extras.has("sites")) {
-            //     JSONArray emergency_site = extras.getJSONArray("sites");
-            //     if (!emergency_site.isEmpty()) {
-            //         return emergency_site;
-            //         // map.addTile(TileType.EMERGENCY_SITE);
-            //     }
-            // }
+            
         }
         return null;
 
