@@ -80,7 +80,6 @@
   </dependencies>
 
   <build>
-      <pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -108,39 +107,6 @@
           <daemonThreadJoinTimeout>${timeout}</daemonThreadJoinTimeout>
         </configuration>
       </plugin>
-      <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-pmd-plugin</artifactId>
-      <version>3.21.2</version>
-      <configuration>
-        <targetJdk>21</targetJdk>
-        <rulesets>
-            <ruleset>src/main/resources/ruleset.xml</ruleset>
-        </rulesets>
-        </configuration>
-      <dependencies>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-core</artifactId>
-              <version>${pmdVersion}</version>
-            </dependency>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-java</artifactId>
-              <version>${pmdVersion}</version>
-            </dependency>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-javascript</artifactId>
-              <version>${pmdVersion}</version>
-            </dependency>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-jsp</artifactId>
-              <version>${pmdVersion}</version>
-            </dependency>
-          </dependencies>
-    </plugin>
     <plugin>
       <groupId>org.sonarsource.scanner.maven</groupId>
       <artifactId>sonar-maven-plugin</artifactId>
@@ -166,7 +132,6 @@
       </executions>
     </plugin>
     </plugins>
-            </pluginManagement>
   </build>
 
   <dependencyManagement>
