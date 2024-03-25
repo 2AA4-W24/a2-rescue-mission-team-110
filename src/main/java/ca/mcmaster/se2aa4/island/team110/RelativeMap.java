@@ -43,14 +43,17 @@ public class RelativeMap {
                 this.current_position = new Point(this.current_position.x() - 1, this.current_position.y());
                 break;
         }
-        
     }
 
     public void updatePosTurn(String direction) {
         updatePos();
         this.current_heading = this.current_heading.turn(direction);
         updatePos();
-        
+    }
+
+    public void updatePosMoveTo(DroneHeading direction){
+        this.current_heading = direction;
+        updatePos();
     }
 
     public void addTile(TileType tileType){
