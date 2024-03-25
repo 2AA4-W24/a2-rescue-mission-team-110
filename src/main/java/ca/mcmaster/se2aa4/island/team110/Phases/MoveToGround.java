@@ -2,10 +2,15 @@ package ca.mcmaster.se2aa4.island.team110.Phases;
 
 import org.json.JSONObject;
 
-import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneController;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneRadar;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
+
+import ca.mcmaster.se2aa4.island.team110.RelativeMap;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
+import ca.mcmaster.se2aa4.island.team110.Records.Point;
+import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import org.apache.logging.log4j.LogManager;
@@ -14,53 +19,53 @@ import org.apache.logging.log4j.Logger;
 public class MoveToGround implements Phase {
     private final Logger logger = LogManager.getLogger();
 
-    private DroneController droneController = new DroneController();
-    private DroneRadar droneRadar = new DroneRadar();
-
-    private RelativeMap map;
-
-    private State current = State.ECHO;
-    private int range = -1;
-    private String echo_direction;
-
-    private boolean reachedGround = false;
-
-    public MoveToGround(RelativeMap map) {
-        this.map = map;
-    }
-
     private enum State {
         FLY, ECHO;
     }
 
-    public void determineEcho() {
-        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
-            this.echo_direction = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
-        } else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST) {
-            this.echo_direction = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
-        }
+    private DroneController droneController = new DroneController();
+    private DroneRadar droneRadar = new DroneRadar();
+
+    private RelativeMap map;
+    private Battery battery;
+    private DefaultJSONResponseParser parser;
+
+    private State current_state;
+    private int range;
+
+    private boolean reachedGround = false;
+    private boolean goHome = false;
+    private boolean reachedGroundSpecial = false;
+    private int batteryThreshold = 300;
+
+
+    public MoveToGround(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
+        this.map = map;
+        this.battery = battery;
+        this.parser = parser;
+
+        this.current_state = State.ECHO;
+        
     }
 
     @Override
     public boolean reachedEnd() {
-        return reachedGround;
+        if (this.goHome) {
+            return goHome;
+        }
+
+        return this.reachedGround;
     }
 
     @Override
     public String getNextDecision() {
-        logger.info("Phase: MoveToGround");
-        if (current == State.FLY && range > 1) {
-            current = State.FLY;
-            range--;
-        } else if (range == 1){
-            reachedGround = true;
-        }
-        switch (current) {
+        switch (current_state) {
             case ECHO:
-                determineEcho();
-                current = State.FLY;
-                return droneRadar.echo(this.echo_direction);
+                String echo_direction = determineEcho();
+                return droneRadar.echo(echo_direction);
             case FLY:
+                this.map.updatePos();
+                this.range--;
                 return droneController.fly();
             default:
                 return null;
@@ -69,21 +74,63 @@ public class MoveToGround implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        return new iFirstPass(this.map);
+        if (this.goHome) {
+            return new ReturnHome(this.map, this.battery);
+        }
+        return new iFirstPass(this.map, this.battery, this.parser);
+        
     }
 
     public void updateState(JSONObject response) {
-        if (response.has("extras")) {
-            JSONObject extras = response.getJSONObject("extras");
-            if (extras.has("range")) {
-                range = extras.getInt("range");
-                logger.info("Range updated to: {}", range);
-            }
+
+        int cost = this.parser.getCost(response);
+        this.battery.updateBatteryLevel(cost);
+
+        if (this.parser.echoRange(response) != Integer.MAX_VALUE) {
+            this.range = this.parser.echoRange(response);
         }
+     
+        if (range == 1) {
+
+            this.reachedGround = true;
+        } 
+        else {
+            this.current_state = determineNextState();
+        }
+        
+        if (this.battery.getBatteryLevel() < this.batteryThreshold) {
+            this.goHome = true;
+        }
+       
     }
+
 
     @Override
     public boolean isFinal() {
         return false;
+    } 
+
+    private String determineEcho() {
+        String echo_direction = "";
+        if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
+            echo_direction = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
+        } 
+        else if (map.getCurrentHeading() == DroneHeading.EAST || map.getCurrentHeading() == DroneHeading.WEST) {
+            echo_direction = map.getCurrentHeading() == DroneHeading.EAST ? "E" : "W";
+        }
+        return echo_direction;
+    } 
+    
+    private State determineNextState() {
+        switch(this.current_state) {
+            case ECHO:
+                return State.FLY;
+            case FLY:
+                return State.FLY;
+            default: 
+                return null;
+      
+        }
+
     }
 }

@@ -14,6 +14,8 @@ import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.Phases.FindGround;
 import ca.mcmaster.se2aa4.island.team110.Phases.EmergencySite;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
+import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 
 public class Explorer implements IExplorerRaid {
@@ -22,6 +24,7 @@ public class Explorer implements IExplorerRaid {
 
     private DroneHeading droneHeading;
     private RelativeMap relativeMap;
+    private Battery battery;
     private Phase current_phase;
     
 
@@ -31,17 +34,17 @@ public class Explorer implements IExplorerRaid {
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Initialization info:\n {}", info.toString(2));
         String direction = info.getString("heading");
+        Integer batteryLevel = info.getInt("budget");
 
+        //Initialize necessary modules
         droneHeading = DroneHeading.getHeading(direction);
         relativeMap = new RelativeMap(droneHeading);
+        battery = new Battery(batteryLevel);
+        DefaultJSONResponseParser parser = new DefaultJSONResponseParser();
 
-        this.current_phase = new FindGround(relativeMap);
+        //Initialize current phase
+        this.current_phase = new FindGround(relativeMap, battery, parser);
 
-
-        Integer batteryLevel = info.getInt("budget");
-        
-
-        
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
     }
@@ -86,9 +89,7 @@ public class Explorer implements IExplorerRaid {
     @Override
     public String deliverFinalReport() {
         String closestCreek = relativeMap.getClosestCreekId();
-        logger.info("Successfully returned back to base");
         logger.info("The closest creek to the emergency site is: {}", closestCreek);
-
         return closestCreek;
     }
 

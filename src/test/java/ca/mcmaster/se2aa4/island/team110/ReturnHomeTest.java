@@ -7,15 +7,18 @@ import org.json.JSONObject;
 import ca.mcmaster.se2aa4.island.team110.Phases.ReturnHome;
 import ca.mcmaster.se2aa4.island.team110.Aerial.DroneHeading;
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
+import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
 public class ReturnHomeTest {
     private ReturnHome returnHome;
     private TestableRelativeMap map;
+    private Battery battery;
 
     @BeforeEach
     void setUp() {
         map = new TestableRelativeMap(DroneHeading.NORTH);
-        returnHome = new ReturnHome(map);
+        battery = new Battery(1000);
+        returnHome = new ReturnHome(map, battery);
     }
 
     
@@ -78,6 +81,46 @@ public class ReturnHomeTest {
         returnHome.updateState(new JSONObject());
         boolean reachedEnd = returnHome.reachedEnd();
         assertFalse(reachedEnd);
+    }
+
+    @Test
+    void testArriveAtHome() {
+        map.setCurrentPosition(new Point(0, 0));
+        returnHome.updateState(new JSONObject());
+        assertTrue(returnHome.reachedEnd());
+    }
+
+
+    @Test
+    void testAdjustHeadingEast() {
+        map.setCurrentPosition(new Point(3, 0));
+        map.setCurrentHeading(DroneHeading.NORTH);
+        String decision = returnHome.getNextDecision();
+        assertEquals("heading", new JSONObject(decision).getString("action"));
+    }
+
+    @Test
+    void testAdjustHeadingWest() {
+        map.setCurrentPosition(new Point(-3, 0));
+        map.setCurrentHeading(DroneHeading.SOUTH);
+        String decision = returnHome.getNextDecision();
+        assertEquals("heading", new JSONObject(decision).getString("action"));
+    }
+
+    @Test
+    void testAdjustHeadingNorth() {
+        map.setCurrentPosition(new Point(0, -3));
+        map.setCurrentHeading(DroneHeading.WEST);
+        String decision = returnHome.getNextDecision();
+        assertEquals("heading", new JSONObject(decision).getString("action"));
+    }
+
+    @Test
+    void testAdjustHeadingSouth() {
+        map.setCurrentPosition(new Point(0, 3));
+        map.setCurrentHeading(DroneHeading.EAST);
+        String decision = returnHome.getNextDecision();
+        assertEquals("heading", new JSONObject(decision).getString("action"));
     }
 
 
