@@ -103,4 +103,40 @@ public class iSecondPassTest {
         }
         assertFalse(secondPass.reachedEnd(), "Phase should continue after a U-turn, not end immediately");
     }
+
+    @Test
+    void testInitialStateAfterSetup() {
+        assertNotNull(secondPass.getNextDecision());
+    }
+
+
+    @Test
+    void testEchoStateAfterFly() {
+        secondPass.updateState(new JSONObject());
+        assertEquals("heading", new JSONObject(secondPass.getNextDecision()).getString("action"));
+    }
+
+    @Test
+    void testUTurnStateInitiation() {
+        secondPass.updateState(new JSONObject().put("extras", new JSONObject().put("found", "OUT_OF_RANGE")));
+        assertTrue(secondPass.reachedEnd() != true);
+    }
+
+    
+
+    @Test
+    void testHeadingStateAfterFly2() {
+        secondPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 0)));
+        assertEquals("heading", new JSONObject(secondPass.getNextDecision()).getString("action"));
+    }
+
+
+    @Test
+    void testEchoDirectionChange() {
+        secondPass.updateState(new JSONObject().put("extras", new JSONObject().put("range", 10)));
+        secondPass.updateState(new JSONObject().put("extras", new JSONObject().put("found", "GROUND")));
+        assertNotEquals("N", new JSONObject(secondPass.getNextDecision()).getString("action"));
+    }
+
+    
 }

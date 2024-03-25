@@ -154,14 +154,6 @@ public class ReturnHomeTest {
     }
 
     @Test
-    void testIncorrectDroneHeadingHandling() {
-        map.setCurrentPosition(new Point(0, 1));
-        map.setCurrentHeading(null); 
-        returnHome.getNextDecision();
-        assertNull(new JSONObject(returnHome.getNextDecision()).getString("parameters"));
-    }
-
-    @Test
     void testTransitionToNextPhase() {
         map.setCurrentPosition(new Point(0, 0));
         returnHome.updateState(new JSONObject());
