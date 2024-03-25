@@ -85,7 +85,7 @@ public class RelativeMap {
     }
     
 
-    private Point getClosestCreek() {
+    private Point getClosestCreek() { //finding the closest creek
         Point closest_creek = null;
         double closest_distance = Double.MAX_VALUE;
         Point emergency_site = null;
