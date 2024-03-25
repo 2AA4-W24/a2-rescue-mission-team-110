@@ -123,5 +123,52 @@ public class ReturnHomeTest {
         assertEquals("heading", new JSONObject(decision).getString("action"));
     }
 
+    @Test
+    void testInitiateUTurnWhenNecessary() {
+        map.setCurrentPosition(new Point(1, 0));
+        map.setCurrentHeading(DroneHeading.SOUTH);
+        assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+    }
+
+    @Test
+    void testStateUpdateAfterUTurn() {
+        map.setCurrentPosition(new Point(1, 0));
+        map.setCurrentHeading(DroneHeading.SOUTH);
+        returnHome.getNextDecision();
+        returnHome.updateState(new JSONObject());
+        assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+    }
+
+    @Test
+    void testEdgeCaseDecisionMaking() {
+        map.setCurrentPosition(new Point(0, -1));
+        map.setCurrentHeading(DroneHeading.SOUTH);
+        assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+    }
+
+    @Test
+    void testDroneHeadingAdjustmentNearHome() {
+        map.setCurrentPosition(new Point(1, 0));
+        map.setCurrentHeading(DroneHeading.NORTH);
+        assertEquals("heading", new JSONObject(returnHome.getNextDecision()).getString("action"));
+    }
+
+    @Test
+    void testIncorrectDroneHeadingHandling() {
+        map.setCurrentPosition(new Point(0, 1));
+        map.setCurrentHeading(null); 
+        returnHome.getNextDecision();
+        assertNull(new JSONObject(returnHome.getNextDecision()).getString("parameters"));
+    }
+
+    @Test
+    void testTransitionToNextPhase() {
+        map.setCurrentPosition(new Point(0, 0));
+        returnHome.updateState(new JSONObject());
+        assertTrue(returnHome.reachedEnd());
+    }
+
+
+
 
 }

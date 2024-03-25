@@ -14,9 +14,15 @@ public class TestableRelativeMap extends RelativeMap {
   private boolean emergencySiteFound = false;
   private String emergencySiteID;
   private Point currentPosition;
+  private Point emergencySiteLocation;
+  
 
   public TestableRelativeMap(DroneHeading initialHeading) {
     super(initialHeading);
+  }
+
+  public void setEmergencySiteLocation(Point emergencySiteLocation) {
+    this.emergencySiteLocation = emergencySiteLocation;
   }
 
   
@@ -56,6 +62,11 @@ public class TestableRelativeMap extends RelativeMap {
   @Override
   public Point getCurrentPosition() {
       return this.currentPosition;
+  }
+
+  @Override
+  public Point getEmergencySiteLocation() {
+    return this.emergencySiteLocation;
   }
 
   
