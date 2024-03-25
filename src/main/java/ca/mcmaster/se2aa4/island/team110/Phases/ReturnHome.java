@@ -19,7 +19,6 @@ public class ReturnHome implements Phase {
    
     private DroneController droneController = new DroneController();
     private boolean isHome = false;
-    private boolean done = false;
     private boolean hasUTurned;
     private boolean needsUTurn;
    
@@ -48,7 +47,7 @@ public class ReturnHome implements Phase {
 
     @Override
     public boolean reachedEnd() {
-        return this.done;
+        return this.isHome;
     }
 
 
@@ -67,12 +66,6 @@ public class ReturnHome implements Phase {
 
         if (this.current_state == State.U_TURN) {
             return makeUTurn();
-        }
-
-        if (isHome){
-            this.done = true;
-
-            return droneController.stop();
         }
 
         //Corner case
