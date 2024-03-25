@@ -13,7 +13,6 @@ import ca.mcmaster.se2aa4.island.team110.TileType;
 import ca.mcmaster.se2aa4.island.team110.Interfaces.Phase;
 import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
-import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.DefaultJSONResponseParser;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 public class iFirstPass implements Phase {
 
+    //Defining all necessary modules and variables
     private final Logger logger = LogManager.getLogger();
     private DroneController droneController = new DroneController();
     private DroneRadar droneRadar = new DroneRadar();
@@ -51,6 +51,7 @@ public class iFirstPass implements Phase {
 
     private int batteryThreshold = 300;
 
+    //Constructors
     public iFirstPass(RelativeMap map, Battery battery, DefaultJSONResponseParser parser) {
         this.map = map;
         this.battery = battery;
@@ -59,6 +60,7 @@ public class iFirstPass implements Phase {
         this.current_state = State.SCAN;
     }
 
+    //States needed in the Phase
     private enum State {
         ECHO, FLY, SCAN, U_TURN, FLY2, GO_HOME;
     }
@@ -71,16 +73,17 @@ public class iFirstPass implements Phase {
         }
         return this.isOutOfRange;
     }
+
     @Override
     public String getNextDecision() {
         logger.info("Phase: iFirstPass");
 
         switch (current_state) {
             case ECHO:  
-                determineEcho();
+                determineEcho(); //Determines which direction to echo
                 return droneRadar.echo(this.echohere);
             case SCAN:
-                this.hasUturned = false;
+                this.hasUturned = false; //Resets the uTurn boolean
                 return droneScanner.scan();
             case FLY:
                 this.map.updatePos();
@@ -88,8 +91,8 @@ public class iFirstPass implements Phase {
             case U_TURN:
                 return makeUTurn();
             case FLY2:
-                if (this.groundDis > 0) {
-                    this.groundDis--;
+                if (this.groundDis > 0) { //Reseting position to start over the process
+                    this.groundDis--; 
                 }
 
                 if (this.groundDis == 0) {    
@@ -108,7 +111,7 @@ public class iFirstPass implements Phase {
 
     @Override
     public Phase getNextPhase() {
-        if (this.goHome) {
+        if (this.goHome) { //Insufficient budget to move on
             return new ReturnHome(this.map, this.battery);
         }
         else {
@@ -119,13 +122,14 @@ public class iFirstPass implements Phase {
     @Override
     public void updateState(JSONObject response) {
 
-        int cost = this.parser.getCost(response);
+        //Updating battery
+        int cost = this.parser.getCost(response); 
         this.battery.updateBatteryLevel(cost);
 
-    
+        //Gets the next state
         this.current_state = determineNextState();
     
-
+        //Adds the scanned tile information to relativemap
         if (this.parser.scanTile(response) != null) {
             TileType tile = this.parser.scanTile(response);
             map.addTile(tile);
@@ -137,6 +141,7 @@ public class iFirstPass implements Phase {
             map.addCreekID(id.getString(0));
         }
         
+        //Organizing u-turn behaviour
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras.has("found")) {
@@ -177,6 +182,7 @@ public class iFirstPass implements Phase {
         return false;
     }
     
+    //Determining which dirrection to echo depending on the current heading
     public void determineEcho() {
         if (this.map.getCurrentHeading() == DroneHeading.NORTH || this.map.getCurrentHeading() == DroneHeading.SOUTH) {
             this.echohere = this.map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
@@ -187,7 +193,7 @@ public class iFirstPass implements Phase {
         }
     }
 
-    private String makeUTurn() { // Only works for one case (Starting position is top left)
+    private String makeUTurn() { // Makes a u-turn
         switch (this.turnStage) {
             case -1:
                 turnStage++;
@@ -206,11 +212,9 @@ public class iFirstPass implements Phase {
                     map.updatePos();
                     return droneController.fly();
                 }
-            case 2: // check the current heading and determine which direction to turn for the
-                    // U-turn
+            case 2: 
                 turnStage++;
                 this.previous_direction = map.getCurrentHeading();
-
                 if (map.getCurrentHeading() == DroneHeading.SOUTH) {
                     this.directionToTurn = "E";
                     map.updatePosTurn("LEFT");
@@ -232,14 +236,6 @@ public class iFirstPass implements Phase {
                     this.directionToTurn = "S";
                     map.updatePosTurn("RIGHT");
                 }
-                // else if (this.previous_direction == DroneHeading.EAST) {
-                // this.directionToTurn = "W";
-                // map.updatePosTurn("LEFT");
-                // }
-                // else if (this.previous_direction == DroneHeading.WEST) {
-                // this.directionToTurn = "E";
-                // map.updatePosTurn("RIGHT");
-                // }
 
                 logger.info("Turn: {}", directionToTurn);
 
@@ -267,7 +263,7 @@ public class iFirstPass implements Phase {
             case FLY:
                 return State.SCAN;
             case U_TURN:
-                if (this.hasUturned) {
+                if (this.hasUturned) { 
                     return State.SCAN;
                 }
                 else {

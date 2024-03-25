@@ -127,13 +127,14 @@ public class iSecondPass implements Phase {
     @Override
     public void updateState(JSONObject response) {
 
+        //Updating battery
         int cost = this.parser.getCost(response);
         this.battery.updateBatteryLevel(cost);
 
-    
+        //Getting the new state 
         this.current_state = determineNextState();
     
-
+        //Adds scanned tile information to relativemap
         if (this.parser.scanTile(response) != null) {
             TileType tile = this.parser.scanTile(response);
             map.addTile(tile);
@@ -145,6 +146,7 @@ public class iSecondPass implements Phase {
             map.addCreekID(id.getString(0));
         }
         
+        //Organizing u-turn behaviour
         if (response.has("extras")) {
             JSONObject extras = response.getJSONObject("extras");
             if (extras.has("found")) {
@@ -171,7 +173,7 @@ public class iSecondPass implements Phase {
                     current_state = State.FLY2;
                 }
             }
-            if (canClearGround && extras.has("range")) { //Was an optimization but it does not work for map 17 for full coverage, maybe should omit
+            if (canClearGround && extras.has("range")) { 
                 clearGround = (extras.getInt("range") > 15);
                 current_state = State.U_TURN;
             }
@@ -181,6 +183,7 @@ public class iSecondPass implements Phase {
             }
         }
 
+        //Checks if the drone can't keep going
         if (this.battery.getBatteryLevel() < this.batteryThreshold) {
             this.goHome = true;
         }
@@ -191,7 +194,7 @@ public class iSecondPass implements Phase {
         return false;
     }
     
-    public void determineEcho() {
+    public void determineEcho() { //Determine which direction to echo
         if (map.getCurrentHeading() == DroneHeading.NORTH || map.getCurrentHeading() == DroneHeading.SOUTH) {
             this.echohere = map.getCurrentHeading() == DroneHeading.NORTH ? "N" : "S";
             this.uturnechohere = map.getCurrentHeading() == DroneHeading.NORTH ? "W" : "W"; // Change logic for all
@@ -201,6 +204,7 @@ public class iSecondPass implements Phase {
         }
     }
 
+    //Initial u-turn to align the second scan
     private String initialUTurn() {
         switch (initTurnStage) {
             case 0:
@@ -342,6 +346,7 @@ public class iSecondPass implements Phase {
         }
     }
 
+    //U-turn to change lanes for interlaced scans
     private String makeUTurn() {
         switch (turnStage) {
             case -1:

@@ -59,7 +59,7 @@ public class MoveToGround implements Phase {
 
     @Override
     public String getNextDecision() {
-        switch (this.current_state) {
+        switch (this.current_state) { 
             case ECHO:
                 String echo_direction = determineEcho();
                 return droneRadar.echo(echo_direction);
@@ -82,7 +82,7 @@ public class MoveToGround implements Phase {
     }
 
     public void updateState(JSONObject response) {
-
+        //Updates budget
         int cost = this.parser.getCost(response);
         this.battery.updateBatteryLevel(cost);
 
@@ -98,6 +98,7 @@ public class MoveToGround implements Phase {
             this.current_state = determineNextState();
         }
         
+        //Checks if budget is below threshold
         if (this.battery.getBatteryLevel() < this.batteryThreshold) {
             this.goHome = true;
         }

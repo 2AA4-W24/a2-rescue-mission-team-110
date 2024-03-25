@@ -169,7 +169,7 @@ public class ReturnHome implements Phase {
         return null;
     }
 
-    private String determineTurnDirection(DroneHeading target_heading) {
+    private String determineTurnDirection(DroneHeading target_heading) { //Determining which direction to turn based on the target_heading
         DroneHeading current_heading = map.getCurrentHeading();
         String heading_to_turn = "";
 
@@ -259,7 +259,7 @@ public class ReturnHome implements Phase {
     }
 
 
-    private String makeUTurn() {
+    private String makeUTurn() { //Making a u-turn for the edge case
         DroneHeading current_heading = map.getCurrentHeading();
         switch (turnStage) {
             case 0:
@@ -282,7 +282,7 @@ public class ReturnHome implements Phase {
         }
     }
 
-    private void config(int version) {
+    private void config(int version) { //configuring the u-turn to determine turn direciton
         if (version == 1) {
             this.turnDir = "RIGHT";
         }
@@ -291,7 +291,7 @@ public class ReturnHome implements Phase {
         }
     }
 
-    private String getUTurnHeadingDir() {
+    private String getUTurnHeadingDir() { //Getting the turn direction based on current direction (for edge cases)
         DroneHeading current_heading = map.getCurrentHeading();
         String headingDir = "";
         if (current_heading == DroneHeading.NORTH && this.turnDir.equals("RIGHT")) {
@@ -346,6 +346,8 @@ public class ReturnHome implements Phase {
 
     public void updateState(JSONObject response) {
         Point current_position = map.getCurrentPosition();
+
+        //Checking if the drone is at home
         if (current_position.x() == 0 && current_position.y() == 0){
             this.isHome = true;
         }
