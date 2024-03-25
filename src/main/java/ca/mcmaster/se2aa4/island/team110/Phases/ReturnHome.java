@@ -9,6 +9,7 @@ import ca.mcmaster.se2aa4.island.team110.RelativeMap;
 import ca.mcmaster.se2aa4.island.team110.Records.Point;
 import ca.mcmaster.se2aa4.island.team110.Records.Battery;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,6 +71,7 @@ public class ReturnHome implements Phase {
 
         if (isHome){
             this.done = true;
+
             return droneController.stop();
         }
 
@@ -360,6 +362,7 @@ public class ReturnHome implements Phase {
         else {
             this.current_state = State.FLY;
         }
+
         
     }
 
